@@ -26,6 +26,7 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+
 /**
  * This class represents a car dealership software, providing some basic operations.
  * Available operations:
@@ -60,10 +61,10 @@ public class Dealership {
         this.users = new ArrayList<User>();
         this.transactions = new ArrayList<SaleTransaction>();
         this.sc = new Scanner(System.in);
-    }
-    
+}
 
-        /**
+
+    /**
      * Constructor. Initializes the inventory, users, and transactions to given values.
      */
     public Dealership(List<Vehicle> vehicleInventory, List<User> users, List<SaleTransaction> transactions) {
@@ -72,14 +73,14 @@ public class Dealership {
         this.transactions = transactions;
         this.sc = new Scanner(System.in);
     }
-    
-    
+
+
     /**
      * This method servers as the main interface between the program and the user.
      * The method interacts with the user by printing out a set of options, and
      * asking the user to select one.
      */
-    public void runSofware() {
+    public void runSoftware() {
         int choice = 0;
         boolean exitProgram = false;
         do {
@@ -102,7 +103,7 @@ public class Dealership {
                     default: System.err.println("Please select a number between 1 and 11.");
                 }
             } catch (InputMismatchException ex) {
-                System.err.println("Input missmatch. Please Try again.");
+                System.err.println("Input mismatch. Please Try again.");
                 sc.nextLine();
                 continue;
             } catch (BadInputException ex) {
@@ -152,26 +153,26 @@ public class Dealership {
         String vin = sc.nextLine();
         if (vin.length() > 10)
             throw new BadInputException("VIN should not be more that 10 characters long.");
-        
+
         System.out.print("\nEnter Make (string): ");
         String make = sc.nextLine();
-        
+
         System.out.print("\nEnter Model (string): ");
         String model = sc.nextLine();
-        
+
         System.out.print("\nEnter Year (int): ");
         int year = sc.nextInt();
-        
+
         System.out.print("\nEnter Mileage (int): ");
         int mileage = sc.nextInt();
         if (mileage < 0)
             throw new BadInputException("Mileage cannot be negative.");
-        
+
         System.out.print("\nEnter Price (float): ");
         float price = sc.nextFloat();
         if (price < 0.0f)
             throw new BadInputException("Price cannot be negative.");
-        
+
         if (vehicleType == 1) {
             sc.nextLine();
             System.out.print("\nEnter body style (string): ");
@@ -527,7 +528,7 @@ public class Dealership {
      * @return A new Dealership object.
      */
     @SuppressWarnings("unchecked") // This will prevent Java unchecked operation warning when
-    // convering from serialized Object to Arraylist<>
+    // converting from serialized Object to Arraylist<>
     public static Dealership readDatabase() {
         System.out.print("Reading database...");
         Dealership cds = null;
@@ -541,7 +542,7 @@ public class Dealership {
             buffer = new BufferedInputStream(file);
             input = new ObjectInputStream(buffer);
             
-            // Read serilized data
+            // Read serialized data
             List<Vehicle> vehicleInventory = (ArrayList<Vehicle>) input.readObject();
             List<User> users = (ArrayList<User>) input.readObject();
             List<SaleTransaction> transactions = (ArrayList<SaleTransaction>) input.readObject();
@@ -623,7 +624,7 @@ public class Dealership {
             cds = new Dealership();
         }
         
-        cds.runSofware();
+        cds.runSoftware();
         cds.writeDatabase();
     }
 }
