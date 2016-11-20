@@ -1,70 +1,26 @@
 package dealership;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.Closeable;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.InputMismatchException;
-import java.awt.*;         // basic awt classes
-import java.awt.event.*;   // event classes
-import javax.swing.*;      // swing classes
+import javax.swing.*;
+import java.awt.*;
+import java.awt.List;
+import java.awt.event.*;
+import java.io.*;
+import java.util.*;
 
-import static java.lang.Thread.sleep;
+public class DealershipGUI extends JFrame {
+    private static Dealership dummy = Dealership.readDatabase(),
+                              db = (dummy == null) ? new Dealership() : dummy;
 
-/**
- * @author Darren Rambaud
- */
-public class DealershipGUI {
-    private final java.util.List<Vehicle> vehicleInventory;
-    private final java.util.List<User> users;
-    private final java.util.List<SaleTransaction> transactions;
-    //FIXME NEED List for logging transactions???
-    private static JFrame main = new JFrame("Dealership Management Software v1.0");
-    private static JTextField field = new JTextField(35);
-    private int uniqueID = 1; // FIXME -- need for userID
-
-    /**
-     * Default constructor.
-     */
-    public DealershipGUI() {
-        this.vehicleInventory = new ArrayList<Vehicle>();
-        this.users = new ArrayList<User>();
-        this.transactions = new ArrayList<SaleTransaction>();
-    }
-
-    /**
-     * Constructor. Initializes the inventory, users, and transactions to given values.
-     */
-    public DealershipGUI(java.util.List<Vehicle> vehicleInventory,
-                      java.util.List<User> users,
-                      java.util.List<SaleTransaction> transactions) {
-        this.vehicleInventory = vehicleInventory;
-        this.users = users;
-        this.transactions = transactions;
-    }
-
-
-    public void menuOptions() {
+    private DealershipGUI (String title) {
+        super(title);
         JPanel mainPanel = new JPanel(new BorderLayout());
         JPanel buttonPanel = new JPanel(new GridLayout(11, 0));
         JLabel intro = new JLabel("Please select an option below:");
-
+        JTextField field = new JTextField(35);
         intro.setHorizontalAlignment(SwingConstants.CENTER);
-
         field.setText("STATUS: waiting for user input ...");
 
-        JButton existing = new JButton("Show all existing vehicles in the database"); // FIXME use a looping construct to create JButtons/ActionListeners??
+        JButton existing = new JButton("Show all existing vehicles in the database");
         existing.setHorizontalAlignment(SwingConstants.LEFT);
         JButton addvehicle = new JButton("Add a new vehicle to the database");
         addvehicle.setHorizontalAlignment(SwingConstants.LEFT);
@@ -90,7 +46,12 @@ public class DealershipGUI {
         existing.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 field.setText("STATUS: in display inventory ...");
-                displayVehicleInventory();
+                Thread qThread = new Thread() {
+                    public void run() {
+                        displayInventory();
+                    }
+                };
+                qThread.start();
             }
         });
 
@@ -150,11 +111,17 @@ public class DealershipGUI {
 
         exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                Thread qThread = new Thread() {
+                    public void run() {
+                        terminateSession();
+                    }
+                };
+                qThread.start();
                 field.setText("STATUS: bye! Saving session ...");
             }
         });
 
-        main.setContentPane(mainPanel);
+        this.setContentPane(mainPanel);
         mainPanel.add(intro, BorderLayout.NORTH);
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
         mainPanel.add(field, BorderLayout.SOUTH);
@@ -170,160 +137,84 @@ public class DealershipGUI {
         buttonPanel.add(showtransax);
         buttonPanel.add(exit);
 
-        main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        main.pack();
-        main.setVisible(true);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.pack();
     }
 
-    public void addVehicle() throws BadInputException { // FIXME may need to create a new exception ??
-        // FIXME - implement add vehicle with new JFrame
-    }
+    public void displayInventory() {
+        String[] header = {"TYPE", "VIN", "MAKE", "MODEL", "YEAR", "MILEAGE", "PRICE", "BODY STYLE", "TYPE",
+                            "DISPLACEMENT (cc)", "LENGTH (ft)", "MAX LOAD WEIGHT (lb)"};
+        String body_style, type, displ, load, length;
+        Object[][] data = new Object[db.getVehicleInvSize()][12];
 
-    public void searchVehicle() {
-        // FIXME - implement vehicle search by VIN
-    }
+        for (int i = 0; i < db.getVehicleInvSize(); ++i) {
+            if(db.getVehicleAtPosition(i) instanceof PassengerCar) {
+                data[i][0] = "Passenger";
+                body_style = ((PassengerCar)db.getVehicleAtPosition(i)).getBodyStyle();
+                data[i][7] = body_style;
+                data[i][8] = "N/A";
+                data[i][9] = "N/A";
+                data[i][10] = "N/A";
+                data[i][11] = "N/A";
+            }
+            else if (db.getVehicleAtPosition(i) instanceof Motorcycle) {
+                data[i][0] = "Motorcycle";
+                type = ((Motorcycle)db.getVehicleAtPosition(i)).getType();
+                displ = Integer.toString(((Motorcycle)db.getVehicleAtPosition(i)).getDisplacement());
+                data[i][7] = "N/A";
+                data[i][8] = type;
+                data[i][9] = displ;
+                data[i][10] = "N/A";
+                data[i][11] = "N/A";
+            }
+            else {
+                data[i][0] = "Truck";
+                load = Float.toString(((Truck)db.getVehicleAtPosition(i)).getMaxLoadWeight());
+                length = Float.toString(((Truck)db.getVehicleAtPosition(i)).getLength());
+                data[i][7] = "N/A";
+                data[i][8] = "N/A";
+                data[i][9] = "N/A";
+                data[i][10] = length;
+                data[i][11] = load;
+            }
 
-    public void deleteVehicle() {
-        // FIXME -- implement deletion of a vehicle
-    }
-
-    public void displayVehicleInventory() {
-        String[] header = {"Vehicle Type", "VIN", "Make", "Model", "Year",
-                                "Mileage", "Price", "Miscellaneous Details"};
-
-        for (int i = 0; i < vehicleInventory.size(); ++i) {
-            
+            data[i][1] = db.getVehicleAtPosition(i).getVin();
+            data[i][2] = db.getVehicleAtPosition(i).getMake();
+            data[i][3] = db.getVehicleAtPosition(i).getModel();
+            data[i][4] = db.getVehicleAtPosition(i).getYear();
+            data[i][5] = db.getVehicleAtPosition(i).getMileage();
+            data[i][6] = db.getVehicleAtPosition(i).getPrice();
         }
 
-        JFrame display = new JFrame("Current Inventory");
-        display.setVisible(true);
-        display.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JFrame display = new JFrame("Inventory List");
+        final JTable table = new JTable(data, header);
+        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+        table.setFillsViewportHeight(true);
+        table.setEnabled(false);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        display.add(scrollPane);
+
         display.pack();
-
-        JTable inventory = new JTable(header); // FIXME
+        display.setVisible(true);
+        display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
 
-    public void displayVehiclesByPrice() {
-        // FIXME -- implement
+    public void terminateSession() {
+        db.writeDatabase();
+        System.exit(0);
     }
 
-    public void addNewUser() {
-        // FIXME
-    }
-
-    public void updateUser() {
-        // FIXME
-    }
-
-    public void displayUserList() {
-        // FIXME
-    }
-
-    public void sellVehicle() {
-        /// FIXME
-    }
-
-    public void showSales() {
-        // FIXME
-    }
-
-    public Vehicle searchByVIN() {
-        // FIXME
-        return null;
-    }
-
-    /**
-     * This method is used to save the Dealership database as a
-     * serializable object.
-     * @param cds
-     */
-    public void writeDatabase() {
-        System.out.print("Writing database..."); // FIXME REPLACE THIS
-        //serialize the database
-        OutputStream file = null;
-        OutputStream buffer = null;
-        ObjectOutput output = null;
-        try {
-            file = new FileOutputStream("Dealership.ser"); // FIXME -- make global
-            buffer = new BufferedOutputStream(file);
-            output = new ObjectOutputStream(buffer);
-
-            output.writeObject(vehicleInventory);
-            output.writeObject(users);
-            output.writeObject(transactions);
-            output.writeInt(uniqueID);
-
-            output.close();
-        } catch (IOException ex) {
-            System.err.println(ex.toString());
-        } finally {
-            close(file);
-        }
-        System.out.println("Done."); // FIXME
-    }
-
-    @SuppressWarnings("unchecked")
-    public static DealershipGUI readDatabase() {
-        System.out.print("Reading database..."); // FIXME REPLACE THIS with message dialog?
-        DealershipGUI cds = null;
-
-        // Try to read existing dealership database from a file
-        InputStream file = null;
-        InputStream buffer = null;
-        ObjectInput input = null;
-        try {
-            file = new FileInputStream("Dealership.ser"); // FIXME could make a global constant
-            buffer = new BufferedInputStream(file);
-            input = new ObjectInputStream(buffer);
-
-            // Read serialized data
-            java.util.List<Vehicle> vehicleInventory = (ArrayList<Vehicle>) input.readObject();
-            java.util.List<User> users = (ArrayList<User>) input.readObject();
-            java.util.List<SaleTransaction> transactions = (ArrayList<SaleTransaction>) input.readObject();
-            cds = new DealershipGUI(vehicleInventory, users, transactions);
-            cds.uniqueID = input.readInt();
-
-            input.close();
-        } catch (ClassNotFoundException ex) {
-            System.err.println(ex.toString()); // FIXME replace with logging?
-        } catch (FileNotFoundException ex) {
-            System.err.println("Database file not found."); // FIXME replace with logging?
-        } catch (IOException ex) {
-            System.err.println(ex.toString()); // FIXME  replace with logging?
-        } finally {
-           close(file);
-        }
-        System.out.println("Done."); // FIXME REPLACE..
-
-        return cds;
-    }
-
-    /**
-     * Auxiliary convenience method used to close a file and handle possible
-     * exceptions that may occur.
-     * @param c
-     */
-    public static void close(Closeable c) {
-        if (c == null) {
-            return;
-        }
-        try {
-            c.close();
-        } catch (IOException ex) {
-            System.err.println(ex.toString());
-        }
-    }
+//    public void showDialog(Component f) {
+//        JOptionPane.showMessageDialog(f, "Session has been successfully saved!");
+//    }
 
     public static void main (String[] args) {
-        DealershipGUI j = readDatabase();
-
-        // If you could not read from the file, create a new database.
-        if (j == null) { //FIXME possible logging event
-            System.out.println("Creating a new database.");
-            j = new DealershipGUI();
-        }
-
-        j.menuOptions(); // FIXME use invoke later?
-        j.writeDatabase();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                DealershipGUI exe = new DealershipGUI("Dealership Management Software v1.0");
+                exe.setVisible(true);
+            }
+        });
     }
 }
