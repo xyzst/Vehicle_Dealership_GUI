@@ -49,7 +49,7 @@ public class Dealership {
     private final List<User> users;
     private final List<SaleTransaction> transactions;
     
-    private int userIdCounter = 1;
+    protected int userIdCounter = 1;
     private final Scanner sc; // Used to read from System's standard input
 
     /**
@@ -57,9 +57,9 @@ public class Dealership {
      * tables.
      */
     public Dealership() {
-        this.vehicleInventory = new ArrayList<Vehicle>();
-        this.users = new ArrayList<User>();
-        this.transactions = new ArrayList<SaleTransaction>();
+        this.vehicleInventory = new ArrayList<>();
+        this.users = new ArrayList<>();
+        this.transactions = new ArrayList<>();
         this.sc = new Scanner(System.in);
 }
 
@@ -74,6 +74,13 @@ public class Dealership {
         this.sc = new Scanner(System.in);
     }
 
+    public Vehicle getVehicleAtPosition(int i) {
+        return vehicleInventory.get(i);
+    }
+    public int getVehicleInvSize() {
+        return vehicleInventory.size();
+    }
+
 
     /**
      * This method servers as the main interface between the program and the user.
@@ -81,13 +88,13 @@ public class Dealership {
      * asking the user to select one.
      */
     public void runSoftware() {
-        int choice = 0;
+        int choice;
         boolean exitProgram = false;
         do {
             printMenu();
             try {
                 choice = sc.nextInt();
-            
+
                 switch (choice) {
                     case 1: showAllVehicles(); break;
                     case 2: addNewVehicle(); break;
@@ -615,15 +622,14 @@ public class Dealership {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
         Dealership cds = readDatabase();
-        
+
         // If you could not read from the file, create a new database.
         if (cds == null) {
             System.out.println("Creating a new database.");
             cds = new Dealership();
         }
-        
+
         cds.runSoftware();
         cds.writeDatabase();
     }
