@@ -117,6 +117,10 @@ public class Dealership {
         return false;
     }
 
+    public int getUserDatabaseSize() { return users.size(); }
+
+    public User getUserAtPosition(int i) { return users.get(i); }
+
 
     /**
      * This method servers as the main interface between the program and the user.
