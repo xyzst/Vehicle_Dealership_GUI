@@ -23,8 +23,7 @@ public class DealershipGUI extends JFrame {
 
     private JButton exitFrom,
                     exitFromMotor,
-                    exitFromTruck,
-                    exitFromDel;
+                    exitFromTruck;
 
     DealershipGUI() {
     }
@@ -550,7 +549,50 @@ public class DealershipGUI extends JFrame {
     }
 
     public void listUsers() {
-        // FIXME
+        if (db.getUserDatabaseSize() == 0) {
+            JOptionPane.showMessageDialog(null, "There is nothing to view as the database\n" +
+                            " is currently empty! Now exiting..", "Failure!",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String[] header = {"TYPE", "ID#", "FIRST NAME", "LAST NAME", "PHONE NUMBER", "DL#", "MONTHLY SALARY",
+                            "BANK ACCT#"};
+        Object[][] data = new Object[db.getUserDatabaseSize()][header.length];
+
+        for (int i = 0; i < db.getUserDatabaseSize(); ++i) {
+            if(db.getUserAtPosition(i) instanceof Customer) {
+                data[i][0] = "Customer";
+                data[i][4] = ((Customer)db.getUserAtPosition(i)).getPhoneNumber();
+                data[i][5] = ((Customer)db.getUserAtPosition(i)).getDriverLicenceNumber();
+                data[i][6] = "N/A";
+                data[i][7] = "N/A";
+            }
+            else if (db.getUserAtPosition(i) instanceof Employee) {
+                data[i][0] = "Employee";
+                data[i][4] = "N/A";
+                data[i][5] = "N/A";
+                data[i][6] = ((Employee)db.getUserAtPosition(i)).getMonthlySalary();
+                data[i][7] = ((Employee)db.getUserAtPosition(i)).getBankAccountNumber();
+            }
+
+            data[i][1] = db.getUserAtPosition(i).getId();
+            data[i][2] = db.getUserAtPosition(i).getFirstName();
+            data[i][3] = db.getUserAtPosition(i).getLastName();
+        }
+
+        JFrame display = new JFrame("User List");
+        final JTable table = new JTable(data, header);
+        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+        table.setFillsViewportHeight(true);
+        table.setEnabled(false);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        display.add(scrollPane);
+
+        display.pack();
+        display.setVisible(true);
+        display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
 
     public void addUserGUI() {
