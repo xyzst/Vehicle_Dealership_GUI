@@ -21,10 +21,11 @@ public class DealershipGUI extends JFrame {
 
     private final static int extraWindowWidth = 100;
 
-    private JButton exitFrom;
+    private JButton exitFrom,
+                    exitFromMotor,
+                    exitFromTruck;
 
     DealershipGUI() {
-
     }
 
     private DealershipGUI (String title) {
@@ -418,13 +419,383 @@ public class DealershipGUI extends JFrame {
         });
 
         // Panel for adding a new motorcycle
-        JPanel card2 = new JPanel();
+        JPanel card2 = new JPanel(new GridLayout(10,1,1,1)) {
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.width += extraWindowWidth;
+                return size;
+            }
+        };
+        JLabel mVIN = new JLabel("VIN (string)");
+        JTextField mVINTF = new JTextField("", 12);
+        card2.add(mVIN);
+        card2.add(mVINTF);
+        JLabel mMAKE = new JLabel("Make (string)");
+        JTextField mMAKETF = new JTextField("", 12);
+        card2.add(mMAKE);
+        card2.add(mMAKETF);
+        JLabel mMODEL = new JLabel("Model (string)");
+        JTextField mMODELTF = new JTextField("", 12);
+        card2.add(mMODEL);
+        card2.add(mMODELTF);
+        JLabel mYEAR = new JLabel("Year (int)");
+        JTextField mYEARTF = new JTextField("", 12);
+        card2.add(mYEAR);
+        card2.add(mYEARTF);
+        JLabel mMILEAGE = new JLabel("Mileage (int)");
+        JTextField mMILEAGETF = new JTextField("", 12);
+        card2.add(mMILEAGE);
+        card2.add(mMILEAGETF);
+        JLabel mPRICE = new JLabel("Price (float)");
+        JTextField mPRICETF = new JTextField("", 12);
+        card2.add(mPRICE);
+        card2.add(mPRICETF);
+        JLabel mTYPE = new JLabel("Type (string)");
+        JTextField mTYPETF = new JTextField("", 12);
+        card2.add(mTYPE);
+        card2.add(mTYPETF);
+        JLabel mDISPL = new JLabel("Displacement (int)");
+        JTextField mDISPLTF = new JTextField("", 12);
+        card2.add(mDISPL);
+        card2.add(mDISPLTF);
+        JButton mSUBMIT = new JButton ("Submit");
+        card2.add(mSUBMIT);
+        JButton mCLEAR = new JButton("Clear");
+        card2.add(mCLEAR);
+        exitFromMotor = new JButton("Exit");
+        card2.add(exitFromMotor);
 
-        card2.add(new JTextField("TextField", 20));
+        exitFromMotor.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Container frame = exitFrom.getParent();
+                do {
+                    frame = frame.getParent();
+                } while (!(frame instanceof JFrame));
+                ((JFrame) frame).dispose();
+            }
+        });
+
+        mSUBMIT.addActionListener(new ActionListener() {
+            public void actionPerformed (ActionEvent e) {
+                Thread qThread = new Thread() {
+                    public void run() {
+                        String VIN, make, model, type;
+                        int year, mileage, displ;
+                        float price;
+                        ArrayList<String> err = new ArrayList<>();
+
+                        if (mVINTF.getText().length() == 0) {
+                            err.add("Field 'VIN' is empty");
+                        }
+                        else if (mVINTF.getText().length() > 10) {
+                            err.add("'VIN' length is too long!");
+                        }
+                        else if (db.vehicleMatch(mVINTF.getText())) {
+                            err.add("'VIN' already exists in the database!");
+                        }
+
+                        VIN = mVINTF.getText();
+
+
+                        if (mMAKETF.getText().length() == 0) {
+                            err.add("Field 'Make' is empty");
+                        }
+
+                        make = mMAKETF.getText();
+
+                        if (mMODELTF.getText().length() == 0) {
+                            err.add("Field 'Model' is empty");
+                        }
+
+                        model = mMODELTF.getText();
+
+                        if (mYEARTF.getText().length() != 4) {
+                            err.add("'Year' value is invalid");
+                        }
+                        else if (Integer.parseInt(mYEARTF.getText()) < 0) {
+                            err.add("'Year' cannot be a negative value");
+                        }
+                        else if (Integer.parseInt(mYEARTF.getText()) < 1886 ||
+                                Integer.parseInt(mYEARTF.getText()) > 2020) {
+                            err.add("'Year' is not within the acceptable range");
+                        }
+
+                        year = Integer.parseInt(mYEARTF.getText());
+
+                        if (mMILEAGETF.getText().length() == 0) {
+                            err.add("Field 'Mileage' is empty");
+                        }
+                        else if (Integer.parseInt(mMILEAGETF.getText()) < 0) {
+                            err.add("'Mileage' cannot be a negative value");
+                        }
+
+                        mileage = Integer.parseInt(mMILEAGETF.getText());
+
+                        if (mPRICETF.getText().length() == 0) {
+                            err.add("Field 'Price' is empty");
+                        }
+                        else if (Float.parseFloat(mPRICETF.getText()) < 0) {
+                            err.add("'Price' cannot be a negative value");
+                        }
+
+                        price = Float.parseFloat(mPRICETF.getText());
+
+                        if (mTYPETF.getText().length() == 0) {
+                            err.add("Field 'Type' is empty");
+                        }
+
+                        type = mTYPETF.getText();
+
+                        if (mDISPLTF.getText().length() == 0) {
+                            err.add("Field 'Displacement' is empty");
+                        }
+                        else if (Integer.parseInt(mDISPLTF.getText()) < 0) {
+                            err.add("Displacement cannot be a negative value");
+                        }
+
+                        displ = Integer.parseInt(mTYPETF.getText());
+
+                        if (err.isEmpty()) {
+                            Motorcycle newObj = new Motorcycle(VIN, make, model, year, mileage, price, type, displ);
+                            if (db.addVehicleDirectly(newObj)) {
+                                Container frame = card2.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "Vehicle has been successfully added!\n" +
+                                                "You may continue to add vehicles by pressing \"Ok\" \n" +
+                                                "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
+                                                "then \"Exit\" (in the 'Adding vehicle' window)",
+                                                "Success!", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                            else {
+                                Container frame = card2.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "addVehicleDirectly(Vehicle) method failed, " +
+                                                "despite criteria being met. An unknown error has occurred!", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                        else {
+                            Container frame = card2.getParent();
+                            do {
+                                frame = frame.getParent();
+                            } while (!(frame instanceof JFrame));
+                            for (String i : err) {
+                                JOptionPane.showMessageDialog(frame, i, "Failure!", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                };
+                qThread.start();
+            }
+        });
+
+        mCLEAR.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                mVINTF.setText("");
+                mMAKETF.setText("");
+                mMODELTF.setText("");
+                mYEARTF.setText("");
+                mMILEAGETF.setText("");
+                mPRICETF.setText("");
+                mTYPE.setText("");
+                mDISPLTF.setText("");
+            }
+        });
 
         // Panel for adding a new truck
-        JPanel card3 = new JPanel();
-        card3.add(new JTextField("TextField", 20));
+        JPanel card3 = new JPanel(new GridLayout(10,1,1,1)) {
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.width += extraWindowWidth;
+                return size;
+            }
+        };
+        JLabel tVIN = new JLabel("VIN (string)");
+        JTextField tVINTF = new JTextField("", 12);
+        card3.add(tVIN);
+        card3.add(tVINTF);
+        JLabel tMAKE = new JLabel("Make (string)");
+        JTextField tMAKETF = new JTextField("", 12);
+        card3.add(tMAKE);
+        card3.add(tMAKETF);
+        JLabel tMODEL = new JLabel("Model (string)");
+        JTextField tMODELTF = new JTextField("", 12);
+        card3.add(tMODEL);
+        card3.add(tMODELTF);
+        JLabel tYEAR = new JLabel("Year (int)");
+        JTextField tYEARTF = new JTextField("", 12);
+        card3.add(tYEAR);
+        card3.add(tYEARTF);
+        JLabel tMILEAGE = new JLabel("Mileage (int)");
+        JTextField tMILEAGETF = new JTextField("", 12);
+        card3.add(tMILEAGE);
+        card3.add(tMILEAGETF);
+        JLabel tPRICE = new JLabel("Price (float)");
+        JTextField tPRICETF = new JTextField("", 12);
+        card3.add(tPRICE);
+        card3.add(tPRICETF);
+        JLabel tWEIGHT = new JLabel("Max Load Weight (float)");
+        JTextField tWEIGHTTF = new JTextField("", 12);
+        card3.add(tWEIGHT);
+        card3.add(tWEIGHTTF);
+        JLabel tLENGTH = new JLabel("Length (float)");
+        JTextField tLENGTHTF = new JTextField("", 12);
+        card3.add(tLENGTH);
+        card3.add(tLENGTHTF);
+        JButton tSUBMIT = new JButton ("Submit");
+        card3.add(tSUBMIT);
+        JButton tCLEAR = new JButton("Clear");
+        card3.add(tCLEAR);
+        exitFromTruck = new JButton("Exit");
+        card3.add(exitFromTruck);
+
+        exitFromTruck.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Container frame = exitFrom.getParent();
+                do {
+                    frame = frame.getParent();
+                } while (!(frame instanceof JFrame));
+                ((JFrame) frame).dispose();
+            }
+        });
+
+        tSUBMIT.addActionListener(new ActionListener() {
+            public void actionPerformed (ActionEvent e) {
+                Thread qThread = new Thread() {
+                    public void run() {
+                        String VIN, make, model;
+                        int year, mileage;
+                        float price, load, length;
+                        ArrayList<String> err = new ArrayList<>();
+
+                        if (tVINTF.getText().length() == 0) {
+                            err.add("Field 'VIN' is empty");
+                        }
+                        else if (tVINTF.getText().length() > 10) {
+                            err.add("'VIN' length is too long!");
+                        }
+                        else if (db.vehicleMatch(tVINTF.getText())) {
+                            err.add("'VIN' already exists in the database!");
+                        }
+
+                        VIN = tVINTF.getText();
+
+
+                        if (tMAKETF.getText().length() == 0) {
+                            err.add("Field 'Make' is empty");
+                        }
+
+                        make = tMAKETF.getText();
+
+                        if (tMODELTF.getText().length() == 0) {
+                            err.add("Field 'Model' is empty");
+                        }
+
+                        model = tMODELTF.getText();
+
+                        if (tYEARTF.getText().length() != 4) {
+                            err.add("'Year' value is invalid");
+                        }
+                        else if (Integer.parseInt(tYEARTF.getText()) < 0) {
+                            err.add("'Year' cannot be a negative value");
+                        }
+                        else if (Integer.parseInt(tYEARTF.getText()) < 1886 ||
+                                Integer.parseInt(tYEARTF.getText()) > 2020) {
+                            err.add("'Year' is not within the acceptable range");
+                        }
+
+                        year = Integer.parseInt(tYEARTF.getText());
+
+                        if (tMILEAGETF.getText().length() == 0) {
+                            err.add("Field 'Mileage' is empty");
+                        }
+                        else if (Integer.parseInt(tMILEAGETF.getText()) < 0) {
+                            err.add("'Mileage' cannot be a negative value");
+                        }
+
+                        mileage = Integer.parseInt(tMILEAGETF.getText());
+
+                        if (tPRICETF.getText().length() == 0) {
+                            err.add("Field 'Price' is empty");
+                        }
+                        else if (Float.parseFloat(tPRICETF.getText()) < 0) {
+                            err.add("'Price' cannot be a negative value");
+                        }
+
+                        price = Float.parseFloat(tPRICETF.getText());
+
+                        if (tLENGTHTF.getText().length() == 0) {
+                            err.add("Field 'Length' is empty");
+                        }
+                        else if (Float.parseFloat(tLENGTHTF.getText()) < 0) {
+                            err.add("Length cannot be a negative value");
+                        }
+
+                        length = Float.parseFloat(tLENGTHTF.getText());
+
+                        if (tWEIGHTTF.getText().length() == 0) {
+                            err.add("Field 'Weight' is empty");
+                        }
+                        else if (Integer.parseInt(tWEIGHTTF.getText()) < 0) {
+                            err.add("Weight cannot be a negative value");
+                        }
+
+                        load = Float.parseFloat(tWEIGHTTF.getText());
+
+                        if (err.isEmpty()) {
+                            Truck newObj = new Truck(VIN, make, model, year, mileage, price, load, length);
+                            if (db.addVehicleDirectly(newObj)) {
+                                Container frame = card3.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "Vehicle has been successfully added!\n" +
+                                                "You may continue to add vehicles by pressing \"Ok\" \n" +
+                                                "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
+                                                "then \"Exit\" (in the 'Adding vehicle' window)",
+                                        "Success!", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                            else {
+                                Container frame = card3.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "addVehicleDirectly(Vehicle) method failed, " +
+                                                "despite criteria being met. An unknown error has occurred!", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                        else {
+                            Container frame = card3.getParent();
+                            do {
+                                frame = frame.getParent();
+                            } while (!(frame instanceof JFrame));
+                            for (String i : err) {
+                                JOptionPane.showMessageDialog(frame, i, "Failure!", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                };
+                qThread.start();
+            }
+        });
+
+        mCLEAR.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                mVINTF.setText("");
+                mMAKETF.setText("");
+                mMODELTF.setText("");
+                mYEARTF.setText("");
+                mMILEAGETF.setText("");
+                mPRICETF.setText("");
+                mTYPE.setText("");
+                mDISPLTF.setText("");
+            }
+        });
 
         tabbedPane.addTab(PASSENGERPANEL, card1);
         tabbedPane.addTab(MOTORCYCLEPANEL, card2);
