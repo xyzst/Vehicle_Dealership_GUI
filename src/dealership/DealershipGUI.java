@@ -17,7 +17,9 @@ public class DealershipGUI extends JFrame {
 
     private final static String PASSENGERPANEL = "PASSENGER VEHICLE",
                                 MOTORCYCLEPANEL = "MOTORCYCLE",
-                                TRUCKPANEL = "TRUCK";
+                                TRUCKPANEL = "TRUCK",
+                                CUSTOMERPANEL = "CUSTOMER",
+                                EMPLOYEEPANEL = "EMPLOYEE";
 
     private final static int extraWindowWidth = 100;
 
@@ -596,7 +598,16 @@ public class DealershipGUI extends JFrame {
     }
 
     public void addUserGUI() {
-        // FIXME
+        JFrame frame = new JFrame("Adding new user");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        //Create and set up the content pane.
+        DealershipGUI x = new DealershipGUI();
+        x.newPanelComponentUser(frame.getContentPane());
+
+        //Display the window.
+        frame.pack();
+        frame.setVisible(true);
     }
 
     public void updateUserGUI() {
@@ -614,6 +625,266 @@ public class DealershipGUI extends JFrame {
     public void terminateSession() {
         db.writeDatabase();
         System.exit(0);
+    }
+
+    public void newPanelComponentUser(Container pane) {
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        // Panel for adding a new Customer
+        JPanel card1 = new JPanel(new GridLayout(6,1,1,1)) {
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.width += extraWindowWidth;
+                return size;
+            }
+        };
+        JLabel cFName = new JLabel("First Name (String)");
+        JTextField cFNameTF = new JTextField("", 12);
+        card1.add(cFName);
+        card1.add(cFNameTF);
+        JLabel cLName = new JLabel("Last Name (String)");
+        JTextField cLNameTF = new JTextField("", 12);
+        card1.add(cLName);
+        card1.add(cLNameTF);
+        JLabel cPhone = new JLabel("Phone Number (String)");
+        JTextField cPhoneTF = new JTextField("", 12);
+        card1.add(cPhone);
+        card1.add(cPhoneTF);
+        JLabel cDLN = new JLabel("Driver's License (int)");
+        JTextField cDLNTF = new JTextField("", 12);
+        card1.add(cDLN);
+        card1.add(cDLNTF);
+
+        JButton cSUBMIT = new JButton ("Submit");
+        card1.add(cSUBMIT);
+        JButton cCLEAR = new JButton("Clear");
+        card1.add(cCLEAR);
+        exitFrom = new JButton("Exit");
+        card1.add(exitFrom);
+
+        exitFrom.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Container frame = exitFrom.getParent();
+                do {
+                    frame = frame.getParent();
+                } while (!(frame instanceof JFrame));
+                ((JFrame) frame).dispose();
+            }
+        });
+
+        cSUBMIT.addActionListener(new ActionListener() {
+            public void actionPerformed (ActionEvent e) {
+                Thread qThread = new Thread() {
+                    public void run() {
+                        String first, last, phone;
+                        int dl;
+                        ArrayList<String> err = new ArrayList<>();
+
+                        if (cFName.getText().length() == 0) {
+                            err.add("Field 'First Name' is empty");
+                        }
+
+                        first = cFNameTF.getText();
+
+
+                        if (cLNameTF.getText().length() == 0) {
+                            err.add("Field 'Last Name' is empty");
+                        }
+
+                        last = cLNameTF.getText();
+
+                        if (cPhoneTF.getText().length() == 0) {
+                            err.add("Field 'Phone Number' is empty");
+                        }
+
+                        phone = cPhoneTF.getText();
+
+                        if (cDLNTF.getText().length() == 0) {
+                            err.add("'Year' value is invalid");
+                        }
+
+                        dl = Integer.parseInt(cDLNTF.getText());
+
+
+                        if (err.isEmpty()) {
+                            Customer newObj = new Customer(db.userIdCounter++, first, last, phone, dl);
+                            if (db.addUserDirectly(newObj)) {
+                                Container frame = card1.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "User has been successfully added!\n" +
+                                                "You may continue to add users by pressing \"Ok\" \n" +
+                                                "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
+                                                "then \"Exit\" (in the 'Adding new user' window)",
+                                        "Success!", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                            else {
+                                Container frame = card1.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "addUserDirectly(User) method failed, " +
+                                                "despite criteria being met. An unknown error has occurred!", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                        else {
+                            Container frame = card1.getParent();
+                            do {
+                                frame = frame.getParent();
+                            } while (!(frame instanceof JFrame));
+                            for (String i : err) {
+                                JOptionPane.showMessageDialog(frame, i, "Failure!", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                };
+                qThread.start();
+            }
+        });
+
+        cCLEAR.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                cFNameTF.setText("");
+                cLNameTF.setText("");
+                cPhoneTF.setText("");
+                cDLNTF.setText("");
+            }
+        });
+
+        // Panel for adding a new Employee
+        JPanel card2 = new JPanel(new GridLayout(6,1,1,1)) {
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.width += extraWindowWidth;
+                return size;
+            }
+        };
+        JLabel eFName = new JLabel("First Name (String)");
+        JTextField eFNameTF = new JTextField("", 12);
+        card2.add(eFName);
+        card2.add(eFNameTF);
+        JLabel eLName = new JLabel("Last Name (String)");
+        JTextField eLNameTF = new JTextField("", 12);
+        card2.add(eLName);
+        card2.add(eLNameTF);
+        JLabel eSalary = new JLabel("Monthly Salary (float)");
+        JTextField eSalaryTF = new JTextField("", 12);
+        card2.add(eSalary);
+        card2.add(eSalaryTF);
+        JLabel eBAN = new JLabel("Bank Account # (int)");
+        JTextField eBANTF = new JTextField("", 12);
+        card2.add(eBAN);
+        card2.add(eBANTF);
+        JButton eSUBMIT = new JButton ("Submit");
+        card2.add(eSUBMIT);
+        JButton eCLEAR = new JButton("Clear");
+        card2.add(eCLEAR);
+        exitFromMotor = new JButton("Exit");
+        card2.add(exitFromMotor);
+
+        exitFromMotor.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Container frame = exitFrom.getParent();
+                do {
+                    frame = frame.getParent();
+                } while (!(frame instanceof JFrame));
+                ((JFrame) frame).dispose();
+            }
+        });
+
+        eSUBMIT.addActionListener(new ActionListener() {
+            public void actionPerformed (ActionEvent e) {
+                Thread qThread = new Thread() {
+                    public void run() {
+                        String first, last;
+                        int bank;
+                        float salary;
+                        ArrayList<String> err = new ArrayList<>();
+
+                        if (eFNameTF.getText().length() == 0) {
+                            err.add("Field 'First Name' is empty");
+                        }
+
+                        first = eFNameTF.getText();
+
+
+                        if (eLNameTF.getText().length() == 0) {
+                            err.add("Field 'Last Name' is empty");
+                        }
+
+                        last = eLNameTF.getText();
+
+                        if (eBANTF.getText().length() == 0) {
+                            err.add("Field 'Bank Account #' is empty");
+                        }
+                        else if (Integer.parseInt(eBANTF.getText()) < 0) {
+                            err.add("Bank account number cannot be a negative value");
+                        }
+
+                        bank = Integer.parseInt(eBANTF.getText());
+
+                        if (eSalaryTF.getText().length() == 0) {
+                            err.add("Field 'Monthly Salary' is empty");
+                        }
+                        else if (Float.parseFloat(eSalaryTF.getText()) < 0) {
+                            err.add("Monthly Salary cannot be a negative value");
+                        }
+
+                        salary = Float.parseFloat(eSalaryTF.getText());
+
+                        if (err.isEmpty()) {
+                            Employee newObj = new Employee(db.userIdCounter++, first, last, salary, bank);
+                            if (db.addUserDirectly(newObj)) {
+                                Container frame = card2.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "User has been successfully added!\n" +
+                                                "You may continue to add users by pressing \"Ok\" \n" +
+                                                "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
+                                                "then \"Exit\" (in the 'Adding new user' window)",
+                                        "Success!", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                            else {
+                                Container frame = card2.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "addUserDirectly(User) method failed, " +
+                                                "despite criteria being met. An unknown error has occurred!", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                        else {
+                            Container frame = card2.getParent();
+                            do {
+                                frame = frame.getParent();
+                            } while (!(frame instanceof JFrame));
+                            for (String i : err) {
+                                JOptionPane.showMessageDialog(frame, i, "Failure!", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                };
+                qThread.start();
+            }
+        });
+
+        eCLEAR.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                eFNameTF.setText("");
+                eLNameTF.setText("");
+                eBANTF.setText("");
+                eSalaryTF.setText("");
+            }
+        });
+
+        tabbedPane.addTab(CUSTOMERPANEL, card1);
+        tabbedPane.addTab(EMPLOYEEPANEL, card2);
+
+        pane.add(tabbedPane, BorderLayout.WEST);
     }
 
     public void newPanelComponentVehicle(Container pane) {
