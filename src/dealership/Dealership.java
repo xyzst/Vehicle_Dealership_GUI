@@ -94,6 +94,16 @@ public class Dealership {
         return vehicleInventory.add(obj);
     }
 
+    public boolean deleteVehicleByStr(String search) {
+        for (Vehicle i : vehicleInventory) {
+            if (i.getVin().equalsIgnoreCase(search)) {
+                vehicleInventory.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * This method servers as the main interface between the program and the user.
