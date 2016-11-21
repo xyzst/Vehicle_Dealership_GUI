@@ -124,30 +124,60 @@ public class DealershipGUI extends JFrame {
         showuser.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 field.setText("STATUS: in displaying user database ...");
+                Thread qThread = new Thread() {
+                    public void run() {
+                        listUsers();
+                    }
+                };
+                qThread.start();
             }
         });
 
         adduser.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 field.setText("STATUS: adding user ...");
+                Thread qThread = new Thread() {
+                    public void run() {
+                        addUserGUI();
+                    }
+                };
+                qThread.start();
             }
         });
 
         updateuser.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 field.setText("STATUS: updating user ...");
+                Thread qThread = new Thread() {
+                    public void run() {
+                        updateUserGUI();
+                    }
+                };
+                qThread.start();
             }
         });
 
         sellvehicle.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 field.setText("STATUS: selling vehicle ...");
+                Thread qThread = new Thread() {
+                    public void run() {
+                        sellVehicleGUI();
+                    }
+                };
+                qThread.start();
             }
         });
 
         showtransax.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 field.setText("STATUS: showing transactions ...");
+                Thread qThread = new Thread() {
+                    public void run() {
+                        listTransactionsGUI();
+                    }
+                };
+                qThread.start();
             }
         });
 
@@ -517,6 +547,26 @@ public class DealershipGUI extends JFrame {
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
         frame.pack();
+    }
+
+    public void listUsers() {
+        // FIXME
+    }
+
+    public void addUserGUI() {
+        // FIXME
+    }
+
+    public void updateUserGUI() {
+        // FIXME
+    }
+
+    public void sellVehicleGUI(){
+        // FIXME
+    }
+
+    public void listTransactionsGUI() {
+        // FIXME
     }
 
     public void terminateSession() {
