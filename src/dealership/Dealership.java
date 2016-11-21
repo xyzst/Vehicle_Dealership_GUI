@@ -74,6 +74,18 @@ public class Dealership {
         this.sc = new Scanner(System.in);
     }
 
+    public int basicSearch(String search) {
+        int x = 0;
+
+        for (Vehicle i : vehicleInventory) {
+            if (i.getVin().equalsIgnoreCase(search)) {
+                return x;
+            }
+            ++x;
+        }
+        return vehicleInventory.size();
+    }
+
     public boolean vehicleMatch(String id) {
         for (Vehicle i : vehicleInventory) {
             if (i.getVin().equalsIgnoreCase(id)) {
@@ -86,6 +98,7 @@ public class Dealership {
     public Vehicle getVehicleAtPosition(int i) {
         return vehicleInventory.get(i);
     }
+
     public int getVehicleInvSize() {
         return vehicleInventory.size();
     }
