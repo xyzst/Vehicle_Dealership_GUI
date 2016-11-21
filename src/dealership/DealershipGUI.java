@@ -112,6 +112,12 @@ public class DealershipGUI extends JFrame {
         listvehicle.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 field.setText("STATUS: in listing vehicle criteria search ...");
+                Thread qThread = new Thread() {
+                    public void run() {
+                        vehiclePriceRange();
+                    }
+                };
+                qThread.start();
             }
         });
 
@@ -342,7 +348,7 @@ public class DealershipGUI extends JFrame {
                         String[] header = {"TYPE", "VIN", "MAKE", "MODEL", "YEAR", "MILEAGE", "PRICE", "BODY STYLE", "TYPE",
                                 "DISPLACEMENT (cc)", "LENGTH (ft)", "MAX LOAD WEIGHT (lb)"};
 
-                        Object[][] data = new Object[db.getVehicleInvSize()][header.length];
+                        Object[][] data = new Object[1][header.length];
 
                         int index;
                         if ((index = db.basicSearch(search.getText())) != db.getVehicleInvSize()) {
@@ -403,7 +409,114 @@ public class DealershipGUI extends JFrame {
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
         frame.pack();
+    }
 
+    public void vehiclePriceRange() {
+        JFrame frame = new JFrame("Criteria search");
+        if (db.getVehicleInvSize() == 0) {
+            JOptionPane.showMessageDialog(frame, "The database is empty, there is nothing to search for!", "Failure!",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JPanel panel = new JPanel(new GridLayout(3,1,2,5));
+        JLabel low = new JLabel("Enter the minimum price value: ");
+        JLabel high = new JLabel("Enter the maximum price value: ");
+        JTextField lowTF = new JTextField(12);
+        JTextField highTF = new JTextField(12);
+        JButton submit = new JButton("Submit");
+        JButton exit = new JButton("Exit");
+
+        frame.setContentPane(panel);
+        panel.add(low);
+        panel.add(lowTF);
+        panel.add(high);
+        panel.add(highTF);
+        panel.add(submit);
+        panel.add(exit);
+
+        exit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                frame.dispose();
+            }
+        });
+
+        submit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                Thread qThread = new Thread() {
+                    public void run() {
+                        String[] header = {"TYPE", "VIN", "MAKE", "MODEL", "YEAR", "MILEAGE", "PRICE", "BODY STYLE", "TYPE",
+                                "DISPLACEMENT (cc)", "LENGTH (ft)", "MAX LOAD WEIGHT (lb)"};
+
+                        Object[][] data = new Object[db.getVehicleInvSize()][header.length];
+
+                        int index = 0;
+                        float low = Float.parseFloat(lowTF.getText());
+                        float high = Float.parseFloat(highTF.getText());
+                        if (high < low) {
+                            JOptionPane.showMessageDialog(frame, "Invalid range entered!", "Failure!",
+                                    JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        for (int i = 0; i < db.getVehicleInvSize(); ++i) {
+                            if (db.getVehicleAtPosition(i).getPrice() >= low &&
+                                    db.getVehicleAtPosition(i).getPrice() <= high) {
+                                data[index][1] = db.getVehicleAtPosition(i).getVin();
+                                data[index][2] = db.getVehicleAtPosition(i).getMake();
+                                data[index][3] = db.getVehicleAtPosition(i).getModel();
+                                data[index][4] = db.getVehicleAtPosition(i).getYear();
+                                data[index][5] = db.getVehicleAtPosition(i).getMileage();
+                                data[index][6] = db.getVehicleAtPosition(i).getPrice();
+                                if (db.getVehicleAtPosition(i) instanceof PassengerCar) {
+                                    data[index][0] = "Passenger";
+                                    data[index][7] = ((PassengerCar) db.getVehicleAtPosition(i)).getBodyStyle();
+                                    data[index][8] = "N/A";
+                                    data[index][9] = "N/A";
+                                    data[index][10] = "N/A";
+                                    data[index][11] = "N/A";
+                                } else if (db.getVehicleAtPosition(i) instanceof Motorcycle) {
+                                    data[index][0] = "Motorcycle";
+                                    data[index][7] = "N/A";
+                                    data[index][8] = ((Motorcycle) db.getVehicleAtPosition(i)).getType();
+                                    data[index][9] = Integer.toString(((Motorcycle) db.getVehicleAtPosition(i)).getDisplacement());
+                                    data[index][10] = "N/A";
+                                    data[index][11] = "N/A";
+                                } else {
+                                    data[index][0] = "Truck";
+                                    data[index][7] = "N/A";
+                                    data[index][8] = "N/A";
+                                    data[index][9] = "N/A";
+                                    data[index][10] = Float.toString(((Truck) db.getVehicleAtPosition(i)).getLength());
+                                    data[index][11] = Float.toString(((Truck) db.getVehicleAtPosition(i)).getMaxLoadWeight());
+                                }
+                                index++;
+                            }
+                        }
+                        if (index == 0) {
+                            JOptionPane.showMessageDialog(frame, "There are no vehicles that match your criteria", "Failure!",
+                                    JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        JFrame display = new JFrame("Result(s)");
+                        final JTable table = new JTable(data, header);
+                        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+                        table.setFillsViewportHeight(true);
+                        table.setEnabled(false);
+
+                        JScrollPane scrollPane = new JScrollPane(table);
+                        display.add(scrollPane);
+
+                        display.pack();
+                        display.setVisible(true);
+                        display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                    }
+                };
+                qThread.start();
+            }
+        });
+
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setVisible(true);
+        frame.pack();
     }
 
     public void terminateSession() {
