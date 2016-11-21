@@ -100,6 +100,12 @@ public class DealershipGUI extends JFrame {
         searchvehicle.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 field.setText("STATUS: in searching inventory ...");
+                Thread qThread = new Thread() {
+                    public void run() {
+                        searchVehicleGUI();
+                    }
+                };
+                qThread.start();
             }
         });
 
@@ -302,6 +308,102 @@ public class DealershipGUI extends JFrame {
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    public void searchVehicleGUI() {
+        JFrame frame = new JFrame("Vehicle search");
+        if (db.getVehicleInvSize() == 0) {
+            JOptionPane.showMessageDialog(frame, "The database is empty, there is nothing to search for!", "Failure!",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JPanel panel = new JPanel();
+        JLabel instr = new JLabel("Enter the VIN of the vehicle: ");
+        JTextField search = new JTextField(12);
+        JButton submit = new JButton("Submit");
+        JButton exit = new JButton("Exit");
+
+        frame.setContentPane(panel);
+        panel.add(instr);
+        panel.add(search);
+        panel.add(submit);
+        panel.add(exit);
+
+        exit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                frame.dispose();
+            }
+        });
+
+        submit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                Thread qThread = new Thread() {
+                    public void run() {
+                        String[] header = {"TYPE", "VIN", "MAKE", "MODEL", "YEAR", "MILEAGE", "PRICE", "BODY STYLE", "TYPE",
+                                "DISPLACEMENT (cc)", "LENGTH (ft)", "MAX LOAD WEIGHT (lb)"};
+
+                        Object[][] data = new Object[db.getVehicleInvSize()][header.length];
+
+                        int index;
+                        if ((index = db.basicSearch(search.getText())) != db.getVehicleInvSize()) {
+                            data[0][1] = db.getVehicleAtPosition(index).getVin();
+                            data[0][2] = db.getVehicleAtPosition(index).getMake();
+                            data[0][3] = db.getVehicleAtPosition(index).getModel();
+                            data[0][4] = db.getVehicleAtPosition(index).getYear();
+                            data[0][5] = db.getVehicleAtPosition(index).getMileage();
+                            data[0][6] = db.getVehicleAtPosition(index).getPrice();
+                            if (db.getVehicleAtPosition(index) instanceof PassengerCar) {
+                                data[0][0] = "Passenger";
+                                data[0][7] = ((PassengerCar)db.getVehicleAtPosition(index)).getBodyStyle();
+                                data[0][8] = "N/A";
+                                data[0][9] = "N/A";
+                                data[0][10] = "N/A";
+                                data[0][11] = "N/A";
+                            }
+                            else if (db.getVehicleAtPosition(index) instanceof Motorcycle) {
+                                data[0][0] = "Motorcycle";
+                                data[0][7] = "N/A";
+                                data[0][8] = ((Motorcycle)db.getVehicleAtPosition(index)).getType();
+                                data[0][9] = Integer.toString(((Motorcycle)db.getVehicleAtPosition(index)).getDisplacement());
+                                data[0][10] = "N/A";
+                                data[0][11] = "N/A";
+                            }
+                            else {
+                                data[0][0] = "Truck";
+                                data[0][7] = "N/A";
+                                data[0][8] = "N/A";
+                                data[0][9] = "N/A";
+                                data[0][10] = Float.toString(((Truck)db.getVehicleAtPosition(index)).getLength());
+                                data[0][11] = Float.toString(((Truck)db.getVehicleAtPosition(index)).getMaxLoadWeight());
+                            }
+
+                            JFrame display = new JFrame("Result(s)");
+                            final JTable table = new JTable(data, header);
+                            table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+                            table.setFillsViewportHeight(true);
+                            table.setEnabled(false);
+
+                            JScrollPane scrollPane = new JScrollPane(table);
+                            display.add(scrollPane);
+
+                            display.pack();
+                            display.setVisible(true);
+                            display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(frame, "VIN not found in the database!", "Failure!",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                };
+                qThread.start();
+            }
+        });
+
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setVisible(true);
+        frame.pack();
+
     }
 
     public void terminateSession() {
