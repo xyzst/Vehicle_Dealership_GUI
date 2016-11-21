@@ -285,7 +285,7 @@ public class DealershipGUI extends JFrame {
 
         //Create and set up the content pane.
         DealershipGUI x = new DealershipGUI();
-        x.newPanelComponent(frame.getContentPane());
+        x.newPanelComponentVehicle(frame.getContentPane());
 
         //Display the window.
         frame.pack();
@@ -574,7 +574,7 @@ public class DealershipGUI extends JFrame {
         System.exit(0);
     }
 
-    public void newPanelComponent(Container pane) {
+    public void newPanelComponentVehicle(Container pane) {
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // Panel for adding a new passenger vehicle
@@ -1117,16 +1117,16 @@ public class DealershipGUI extends JFrame {
             }
         });
 
-        mCLEAR.addActionListener(new ActionListener() {
+        tCLEAR.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                mVINTF.setText("");
-                mMAKETF.setText("");
-                mMODELTF.setText("");
-                mYEARTF.setText("");
-                mMILEAGETF.setText("");
-                mPRICETF.setText("");
-                mTYPE.setText("");
-                mDISPLTF.setText("");
+                tVINTF.setText("");
+                tMAKETF.setText("");
+                tMODELTF.setText("");
+                tYEARTF.setText("");
+                tMILEAGETF.setText("");
+                tPRICETF.setText("");
+                tLENGTHTF.setText("");
+                tWEIGHTTF.setText("");
             }
         });
 
