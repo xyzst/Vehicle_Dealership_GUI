@@ -8,6 +8,7 @@ import java.awt.List;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import javax.swing.JOptionPane;
 
 
 public class DealershipGUI extends JFrame {
@@ -19,6 +20,8 @@ public class DealershipGUI extends JFrame {
                                 TRUCKPANEL = "TRUCK";
 
     private final static int extraWindowWidth = 100;
+
+    private JButton exitFrom;
 
     DealershipGUI() {
 
@@ -241,7 +244,7 @@ public class DealershipGUI extends JFrame {
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // Panel for adding a new passenger vehicle
-        JPanel card1 = new JPanel(new GridLayout(7,1,1,1)) {
+        JPanel card1 = new JPanel(new GridLayout(9,1,1,1)) {
             public Dimension getPreferredSize() {
                 Dimension size = super.getPreferredSize();
                 size.width += extraWindowWidth;
@@ -280,26 +283,52 @@ public class DealershipGUI extends JFrame {
         card1.add(pcSUBMIT);
         JButton pcCLEAR = new JButton("Clear");
         card1.add(pcCLEAR);
+        exitFrom = new JButton("Exit");
+        card1.add(exitFrom);
+
+        exitFrom.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Container frame = exitFrom.getParent();
+                do {
+                    frame = frame.getParent();
+                } while (!(frame instanceof JFrame));
+                ((JFrame) frame).dispose();
+            }
+        });
 
         pcSUBMIT.addActionListener(new ActionListener() {
             public void actionPerformed (ActionEvent e) {
                 Thread qThread = new Thread() {
                     public void run() {
+                        String VIN, make, model, body;
+                        int year, mileage;
+                        float price;
                         ArrayList<String> err = new ArrayList<>();
+
                         if (pcVINTF.getText().length() == 0) {
                             err.add("Field 'VIN' is empty");
                         }
                         else if (pcVINTF.getText().length() > 10) {
                             err.add("'VIN' length is too long!");
                         }
+                        else if (db.vehicleMatch(pcVINTF.getText())) {
+                            err.add("'VIN' already exists in the database!");
+                        }
+
+                        VIN = pcVINTF.getText();
+
 
                         if (pcMAKETF.getText().length() == 0) {
                             err.add("Field 'Make' is empty");
                         }
 
+                        make = pcMAKETF.getText();
+
                         if (pcMODELTF.getText().length() == 0) {
                             err.add("Field 'Model' is empty");
                         }
+
+                        model = pcMODELTF.getText();
 
                         if (pcYEARTF.getText().length() != 4) {
                             err.add("'Year' value is invalid");
@@ -309,8 +338,10 @@ public class DealershipGUI extends JFrame {
                         }
                         else if (Integer.parseInt(pcYEARTF.getText()) < 1886 ||
                                 Integer.parseInt(pcYEARTF.getText()) > 2020) {
-                            err.add("'Year'  is not within the acceptable range");
+                            err.add("'Year' is not within the acceptable range");
                         }
+
+                        year = Integer.parseInt(pcYEARTF.getText());
 
                         if (pcMILEAGETF.getText().length() == 0) {
                             err.add("Field 'Mileage' is empty");
@@ -319,6 +350,8 @@ public class DealershipGUI extends JFrame {
                             err.add("'Mileage' cannot be a negative value");
                         }
 
+                        mileage = Integer.parseInt(pcMILEAGETF.getText());
+
                         if (pcPRICETF.getText().length() == 0) {
                             err.add("Field 'Price' is empty");
                         }
@@ -326,15 +359,45 @@ public class DealershipGUI extends JFrame {
                             err.add("'Price' cannot be a negative value");
                         }
 
+                        price = Float.parseFloat(pcPRICETF.getText());
+
                         if (pcBODYTF.getText().length() == 0) {
                             err.add("Field 'Body Style' is empty");
                         }
 
+                        body = pcBODYTF.getText();
+
                         if (err.isEmpty()) {
-                            // add vehicle to FIXME stopped here
+                            PassengerCar newObj = new PassengerCar(VIN, make, model, year, mileage, price, body);
+                            if (db.addVehicleDirectly(newObj)) {
+                                Container frame = card1.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "Vehicle has been successfully added!\n" +
+                                        "You may continue to add vehicles by pressing \"Ok\" \n" +
+                                        "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
+                                        "then \"Exit\" (in the 'Adding vehicle' window)",
+                                        "Success!", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                            else {
+                                Container frame = card1.getParent();
+                                do {
+                                    frame = frame.getParent();
+                                } while (!(frame instanceof JFrame));
+                                JOptionPane.showMessageDialog(frame, "addVehicleDirectly(Vehicle) method failed, " +
+                                        "despite criteria being met. An unknown error has occurred!", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
                         }
                         else {
-                            // show dialog message with errors FIXME stopped here
+                            Container frame = card1.getParent();
+                            do {
+                                frame = frame.getParent();
+                            } while (!(frame instanceof JFrame));
+                            for (String i : err) {
+                                JOptionPane.showMessageDialog(frame, i, "Failure!", JOptionPane.ERROR_MESSAGE);
+                            }
                         }
                     }
                 };
@@ -346,6 +409,7 @@ public class DealershipGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 pcVINTF.setText("");
                 pcMAKETF.setText("");
+                pcMODELTF.setText("");
                 pcYEARTF.setText("");
                 pcMILEAGETF.setText("");
                 pcPRICETF.setText("");
