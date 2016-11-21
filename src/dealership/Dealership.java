@@ -74,11 +74,24 @@ public class Dealership {
         this.sc = new Scanner(System.in);
     }
 
+    public boolean vehicleMatch(String id) {
+        for (Vehicle i : vehicleInventory) {
+            if (i.getVin().equalsIgnoreCase(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Vehicle getVehicleAtPosition(int i) {
         return vehicleInventory.get(i);
     }
     public int getVehicleInvSize() {
         return vehicleInventory.size();
+    }
+
+    public boolean addVehicleDirectly(Vehicle obj) {
+        return vehicleInventory.add(obj);
     }
 
 
