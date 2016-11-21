@@ -23,7 +23,8 @@ public class DealershipGUI extends JFrame {
 
     private JButton exitFrom,
                     exitFromMotor,
-                    exitFromTruck;
+                    exitFromTruck,
+                    exitFromDel;
 
     DealershipGUI() {
     }
@@ -87,6 +88,12 @@ public class DealershipGUI extends JFrame {
         vehicledel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 field.setText("STATUS: in deleting vehicle ...");
+                Thread qThread = new Thread() {
+                    public void run() {
+                        deleteVehicleGUI();
+                    }
+                };
+                qThread.start();
             }
         });
 
@@ -165,6 +172,13 @@ public class DealershipGUI extends JFrame {
     }
 
     public void displayInventory() {
+        if (db.getVehicleInvSize() == 0) {
+            JOptionPane.showMessageDialog(null, "There is nothing to view as the database\n" +
+                            " is currently empty! Now exiting..", "Failure!",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         String[] header = {"TYPE", "VIN", "MAKE", "MODEL", "YEAR", "MILEAGE", "PRICE", "BODY STYLE", "TYPE",
                             "DISPLACEMENT (cc)", "LENGTH (ft)", "MAX LOAD WEIGHT (lb)"};
         String body_style, type, displ, load, length;
@@ -232,6 +246,60 @@ public class DealershipGUI extends JFrame {
         x.newPanelComponent(frame.getContentPane());
 
         //Display the window.
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    public void deleteVehicleGUI() {
+        JFrame frame = new JFrame("Deleting vehicle");
+
+        if (db.getVehicleInvSize() == 0) {
+            JOptionPane.showMessageDialog(frame, "There is nothing to delete as the database\n" +
+                            " is currently empty! Now exiting removal process..", "Failure!",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JPanel panel = new JPanel();
+        JLabel instr = new JLabel("Enter the vehicle's VIN (to be deleted): ");
+        JTextField VIN = new JTextField(12);
+        JButton submit = new JButton("Submit");
+        JButton exit = new JButton("Exit");
+
+        frame.setContentPane(panel);
+        panel.add(instr);
+        panel.add(VIN);
+        panel.add(submit);
+        panel.add(exit);
+
+        submit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                Thread qThread = new Thread() {
+                    public void run() {
+                        if (db.deleteVehicleByStr(VIN.getText())) {
+                            JOptionPane.showMessageDialog(frame, "Removal was successful!", "Success!",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(frame, "Removal was unsuccessful! Please check your input" +
+                                            " and try again!", "Failure!",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                };
+                qThread.start();
+            }
+        });
+
+        exit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                frame.dispose();
+            }
+        });
+
+
+        //Display the window.
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
     }
