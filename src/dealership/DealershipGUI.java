@@ -611,7 +611,26 @@ public class DealershipGUI extends JFrame {
     }
 
     public void updateUserGUI() {
-        // FIXME
+        JFrame frame = new JFrame("Update a user");
+        JPanel panel = new JPanel();
+        JTextField entry = new JTextField(12);
+        JLabel id_name = new JLabel("Enter the ID# of the user to be updated: ");
+        JButton submit = new JButton("Submit");
+
+        panel.add(id_name);
+        panel.add(entry);
+        panel.add(submit);
+
+        submit.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                // FIXME stopped here
+            }
+        });
+
+        frame.setContentPane(panel);
+        frame.pack();
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     public void sellVehicleGUI(){
