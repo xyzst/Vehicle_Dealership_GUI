@@ -117,9 +117,17 @@ public class Dealership {
         return false;
     }
 
-    public int getUserDatabaseSize() { return users.size(); }
+    public int getUserDatabaseSize() {
+        return users.size();
+    }
 
-    public User getUserAtPosition(int i) { return users.get(i); }
+    public User getUserAtPosition(int i) {
+        return users.get(i);
+    }
+
+    public boolean addUserDirectly(User obj) {
+        return users.add(obj);
+    }
 
 
     /**
