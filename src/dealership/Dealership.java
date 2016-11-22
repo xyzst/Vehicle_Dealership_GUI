@@ -142,6 +142,13 @@ public class Dealership {
         return users.add(obj);
     }
 
+    public int getSaleTransactionSize() {
+        return transactions.size();
+    }
+
+    public SaleTransaction getTransactionAtPosition(int i) {
+        return transactions.get(i);
+    }
 
     /**
      * This method servers as the main interface between the program and the user.
