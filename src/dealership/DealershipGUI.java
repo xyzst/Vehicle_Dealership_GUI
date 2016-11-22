@@ -714,7 +714,157 @@ public class DealershipGUI extends JFrame {
     }
 
     public void sellVehicleGUI(){
-        // FIXME
+        JFrame frame = new JFrame("Selling a vehicle");
+        JPanel mainpanel = new JPanel();
+        JLabel qCustID = new JLabel("Enter the customer's ID: ");
+        JTextField eCustID = new JTextField(12);
+        JButton submit = new JButton("Submit");
+
+        mainpanel.add(qCustID);
+        mainpanel.add(eCustID);
+        mainpanel.add(submit);
+
+        submit.addActionListener(new ActionListener () {
+            public void actionPerformed (ActionEvent x) {
+                // checking user exists
+                if ((Integer.parseInt(eCustID.getText()) < 0)) {
+                    JOptionPane.showMessageDialog(frame, "INVALID INPUT: ID cannot be a negative value", "Failure!",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+                else if (db.userExists(Integer.parseInt(eCustID.getText())) &&
+                        db.getUserAtPosition(Integer.parseInt(eCustID.getText()) - 1) instanceof Customer) {
+                    final int custID = Integer.parseInt(eCustID.getText());
+                    JPanel subpanel = new JPanel();
+                    JLabel qEmpID = new JLabel("Enter your employee ID: ");
+                    JTextField eEmpID = new JTextField(12);
+                    JButton sub_submit = new JButton("Submit");
+
+                    subpanel.add(qEmpID);
+                    subpanel.add(eEmpID);
+                    subpanel.add(sub_submit);
+
+                    sub_submit.addActionListener(new ActionListener() {
+                        public void actionPerformed (ActionEvent x) {
+                            // checking employee exists
+                            if ((Integer.parseInt(eEmpID.getText()) < 0)) {
+                                JOptionPane.showMessageDialog(frame, "INVALID INPUT: ID cannot be a negative value", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                            else if (db.userExists(Integer.parseInt(eEmpID.getText())) &&
+                                    db.getUserAtPosition(Integer.parseInt(eEmpID.getText()) - 1) instanceof Employee) {
+                                final int employeeID = Integer.parseInt(eEmpID.getText());
+                                JPanel subsubpanel = new JPanel();
+                                JLabel qVIN = new JLabel("Enter the vehicle's VIN: ");
+                                JTextField eVIN = new JTextField(12);
+                                JButton subsub_submit = new JButton("Submit");
+
+                                subsubpanel.add(qVIN);
+                                subsubpanel.add(eVIN);
+                                subsubpanel.add(subsub_submit);
+
+                                subsub_submit.addActionListener(new ActionListener() {
+                                   public void actionPerformed (ActionEvent x) {
+                                       JPanel subsubsubpanel = new JPanel(new GridLayout(6, 4, 4, 4));
+                                       if (db.vehicleMatch(eVIN.getText())) {
+                                           final String VIN = eVIN.getText();
+                                           Date dateOfTransc = new Date(System.currentTimeMillis());
+                                           JLabel qPrice = new JLabel("Enter the final sale price of the vehicle: ");
+                                           JTextField ePrice = new JTextField(12);
+                                           JLabel loggedinas = new JLabel("Logged in as: " +
+                                                   ""+db.getUserAtPosition(employeeID - 1).getFirstName()+" " +
+                                                   ""+db.getUserAtPosition(employeeID - 1).getLastName()+" " +
+                                                   "(id == "+db.getUserAtPosition(employeeID - 1).getId()+")");
+                                           JLabel sellingto = new JLabel("Vehicle sold to: " +
+                                                   ""+db.getUserAtPosition(custID - 1).getFirstName()+" " +
+                                                   ""+db.getUserAtPosition(custID - 1).getLastName()+" " +
+                                                   "(id == "+db.getUserAtPosition(custID - 1).getId()+")");
+                                           JButton subsubsub_submit = new JButton("Submit");
+
+                                           subsubsub_submit.addActionListener(new ActionListener() {
+                                               public void actionPerformed (ActionEvent x) {
+                                                   if (Float.parseFloat(ePrice.getText()) < 0) {
+                                                       JOptionPane.showMessageDialog(frame, "Price cannot be negative! " +
+                                                                       "Please check your input and try again; or exit window\n", "Failure!",
+                                                               JOptionPane.ERROR_MESSAGE);
+                                                       return;
+                                                   }
+                                                   else {
+                                                       SaleTransaction trans = new SaleTransaction(custID, employeeID,
+                                                               VIN, dateOfTransc, Float.parseFloat(ePrice.getText()));
+
+                                                       if (!db.addTransactionGUI(trans)) {
+                                                           JOptionPane.showMessageDialog(frame, "addTransactionGUI() failed!\n" +
+                                                                           "Aborting transaction...", "Failure!",
+                                                                   JOptionPane.ERROR_MESSAGE);
+                                                           frame.dispose();
+                                                           return;
+                                                       }
+
+                                                       if (!db.deleteVehicleByStr(VIN)) {
+                                                           JOptionPane.showMessageDialog(frame, "deleteVehicleByStr failed!\n" +
+                                                                           "Aborting transaction...", "Failure!",
+                                                                   JOptionPane.ERROR_MESSAGE);
+                                                           frame.dispose();
+                                                           return;
+                                                       }
+
+                                                       JOptionPane.showMessageDialog(frame, "Transaction complete!\n " +
+                                                                       "The window will close after pressing \"OK\"", "Success!",
+                                                               JOptionPane.INFORMATION_MESSAGE);
+                                                       frame.dispose();
+                                                   }
+                                               }
+                                           });
+
+                                           subsubsubpanel.add(qPrice);
+                                           subsubsubpanel.add(ePrice);
+                                           subsubsubpanel.add(subsubsub_submit);
+                                           subsubsubpanel.add(loggedinas);
+                                           subsubsubpanel.add(sellingto);
+
+                                       }
+                                       else {
+                                           JOptionPane.showMessageDialog(frame, "VIN does not exist! " +
+                                                           "Please check your input and try again; or exit window\n", "Failure!",
+                                                   JOptionPane.ERROR_MESSAGE);
+                                       }
+
+                                       frame.getContentPane().removeAll();
+                                       frame.getContentPane().add(subsubsubpanel);
+                                       frame.validate();
+                                       frame.pack();
+                                   }
+                                });
+                                frame.getContentPane().removeAll();
+                                frame.getContentPane().add(subsubpanel);
+                                frame.validate();
+                                frame.pack();
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(frame, "Employee does not exist! Please check your input and try again.\n" +
+                                                "Need a valid employee ID to continue with transaction.", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    });
+
+                    frame.getContentPane().removeAll();
+                    frame.getContentPane().add(subpanel);
+                    frame.validate();
+                    frame.pack();
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "User does not exist! Please check your input and try again.\n" +
+                                    "You may need to add the customer to the database before proceeding with a sale.", "Failure!",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        frame.setContentPane(mainpanel);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setVisible(true);
+        frame.pack();
     }
 
     public void listTransactionsGUI() {
