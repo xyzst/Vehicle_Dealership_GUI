@@ -786,7 +786,6 @@ public class DealershipGUI extends JFrame {
                                                        JOptionPane.showMessageDialog(frame, "Price cannot be negative! " +
                                                                        "Please check your input and try again; or exit window\n", "Failure!",
                                                                JOptionPane.ERROR_MESSAGE);
-                                                       return;
                                                    }
                                                    else {
                                                        SaleTransaction trans = new SaleTransaction(custID, employeeID,
@@ -797,7 +796,6 @@ public class DealershipGUI extends JFrame {
                                                                            "Aborting transaction...", "Failure!",
                                                                    JOptionPane.ERROR_MESSAGE);
                                                            frame.dispose();
-                                                           return;
                                                        }
 
                                                        if (!db.deleteVehicleByStr(VIN)) {
@@ -805,7 +803,6 @@ public class DealershipGUI extends JFrame {
                                                                            "Aborting transaction...", "Failure!",
                                                                    JOptionPane.ERROR_MESSAGE);
                                                            frame.dispose();
-                                                           return;
                                                        }
 
                                                        JOptionPane.showMessageDialog(frame, "Transaction complete!\n " +
