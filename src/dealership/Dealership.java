@@ -108,18 +108,38 @@ public class Dealership {
         return false;
     }
 
+    /**
+     * getVehicleAtPosition is a helper method for the GUI to return the Vehicle object at the position i
+     * @param i an int
+     * @return vehicleinventory.get(i), a Vehicle object
+     */
     public Vehicle getVehicleAtPosition(int i) {
         return vehicleInventory.get(i);
     }
 
+    /**
+     * getVehicleInvSize() method returns the current size of vehicleInventory
+     * @return vehicleInventory.size(), an int
+     */
     public int getVehicleInvSize() {
         return vehicleInventory.size();
     }
 
+    /**
+     * addVehicleDirectly() accepts a Vehicle object and returns whether or not the vehicleInventory.add()
+     * method was successful or not
+     * return boolean, vehicleInventory.add(obj)
+     */
     public boolean addVehicleDirectly(Vehicle obj) {
         return vehicleInventory.add(obj);
     }
 
+    /**
+     * deleteVehicleByStr() removes a Vehicle object based upon the common search String passed. Only removes a Vehicle
+     * object if there is a match, returns false otherwise
+     * @param search
+     * @return true if search matched a VIN, false otherwise
+     */
     public boolean deleteVehicleByStr(String search) {
         for (Vehicle i : vehicleInventory) {
             if (i.getVin().equalsIgnoreCase(search)) {
@@ -130,22 +150,46 @@ public class Dealership {
         return false;
     }
 
+    /**
+     * getUserDatabaseSize() is a helper function for the GUI, returns the users.size()
+     * @return an int, users.size()
+     */
     public int getUserDatabaseSize() {
         return users.size();
     }
 
+    /**
+     * getUserAtPosition() returns the User object at position i. It is guaranteed that i will not be greater than, less
+     * than, or equal to size of users.
+     * @param i, the position at which is requested
+     * @return a User object, users.get(i)
+     */
     public User getUserAtPosition(int i) {
         return users.get(i);
     }
 
+    /**
+     * addUserDirectly() is a helper method to the GUI and adds a User obj directly to users
+     * @param obj of User datatype
+     * @return true if users.add(obj) is successful, false otherwise
+     */
     public boolean addUserDirectly(User obj) {
         return users.add(obj);
     }
 
+    /**
+     * getSaleTransactionSize returns the size of the ArrayList of SaleTransactions
+     * @return transactions.size(), an int
+     */
     public int getSaleTransactionSize() {
         return transactions.size();
     }
 
+    /**
+     * getTransactionAtPosition() returns the SaleTransaction object at position i
+     * @param i, an int
+     * @return transactions.users.get(i), a SaleTransaction object
+     */
     public SaleTransaction getTransactionAtPosition(int i) {
         return transactions.get(i);
     }
