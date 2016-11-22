@@ -9,6 +9,8 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import javax.swing.JOptionPane;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 
 public class DealershipGUI extends JFrame {
@@ -268,7 +270,7 @@ public class DealershipGUI extends JFrame {
 
         JFrame display = new JFrame("Inventory List");
         final JTable table = new JTable(data, header);
-        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+        table.setPreferredScrollableViewportSize(new Dimension(800, 100));
         table.setFillsViewportHeight(true);
         table.setEnabled(false);
 
@@ -416,7 +418,7 @@ public class DealershipGUI extends JFrame {
 
                             JFrame display = new JFrame("Result(s)");
                             final JTable table = new JTable(data, header);
-                            table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+                            table.setPreferredScrollableViewportSize(new Dimension(800, 100));
                             table.setFillsViewportHeight(true);
                             table.setEnabled(false);
 
@@ -529,7 +531,7 @@ public class DealershipGUI extends JFrame {
                         }
                         JFrame display = new JFrame("Result(s)");
                         final JTable table = new JTable(data, header);
-                        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+                        table.setPreferredScrollableViewportSize(new Dimension(800, 100));
                         table.setFillsViewportHeight(true);
                         table.setEnabled(false);
 
@@ -585,7 +587,7 @@ public class DealershipGUI extends JFrame {
 
         JFrame display = new JFrame("User List");
         final JTable table = new JTable(data, header);
-        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+        table.setPreferredScrollableViewportSize(new Dimension(800, 100));
         table.setFillsViewportHeight(true);
         table.setEnabled(false);
 
@@ -865,7 +867,37 @@ public class DealershipGUI extends JFrame {
     }
 
     public void listTransactionsGUI() {
-        // FIXME
+        if (db.getSaleTransactionSize() == 0) {
+            JOptionPane.showMessageDialog(null, "There is nothing to view as the database\n" +
+                            " is currently empty! Now exiting..", "Failure!",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String[] header = {"CUSTOMER ID", "EMPLOYEE ID", "VIN", "DATE", "SALE PRICE"};
+        Object[][] data = new Object[db.getSaleTransactionSize()][header.length];
+
+        for (int i = 0; i < db.getSaleTransactionSize(); ++i) {
+            data[i][0] = db.getTransactionAtPosition(i).getCustomerId();
+            data[i][1] = db.getTransactionAtPosition(i).getEmployeeId();
+            data[i][2] = db.getTransactionAtPosition(i).getVin();
+            data[i][3] = db.getTransactionAtPosition(i).getDate();
+            data[i][4] = db.getTransactionAtPosition(i).getSalePrice();
+        }
+
+        JFrame display = new JFrame("Transaction List");
+        final JTable table = new JTable(data, header);
+
+        table.setPreferredScrollableViewportSize(new Dimension(800, 100));
+        table.setFillsViewportHeight(true);
+        table.setEnabled(false);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        display.add(scrollPane);
+
+        display.pack();
+        display.setVisible(true);
+        display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
 
     public void terminateSession() {
