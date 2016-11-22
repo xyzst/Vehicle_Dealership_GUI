@@ -2,15 +2,10 @@ package dealership;
 
 import layout.SpringUtilities;
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.List;
 import java.awt.event.*;
-import java.io.*;
 import java.util.*;
 import javax.swing.JOptionPane;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 
 public class DealershipGUI extends JFrame {
