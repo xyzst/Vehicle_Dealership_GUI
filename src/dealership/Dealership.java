@@ -26,6 +26,7 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+
 /**
  * This class represents a car dealership software, providing some basic operations.
  * Available operations:
@@ -48,7 +49,7 @@ public class Dealership {
     private final List<User> users;
     private final List<SaleTransaction> transactions;
     
-    private int userIdCounter = 1;
+    protected int userIdCounter = 1;
     private final Scanner sc; // Used to read from System's standard input
 
     /**
@@ -56,14 +57,14 @@ public class Dealership {
      * tables.
      */
     public Dealership() {
-        this.vehicleInventory = new ArrayList<Vehicle>();
-        this.users = new ArrayList<User>();
-        this.transactions = new ArrayList<SaleTransaction>();
+        this.vehicleInventory = new ArrayList<>();
+        this.users = new ArrayList<>();
+        this.transactions = new ArrayList<>();
         this.sc = new Scanner(System.in);
-    }
-    
+}
 
-        /**
+
+    /**
      * Constructor. Initializes the inventory, users, and transactions to given values.
      */
     public Dealership(List<Vehicle> vehicleInventory, List<User> users, List<SaleTransaction> transactions) {
@@ -72,21 +73,140 @@ public class Dealership {
         this.transactions = transactions;
         this.sc = new Scanner(System.in);
     }
-    
-    
+
+    public boolean userExists(int id) {
+        for (User i : users) {
+            if (i.getId() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean addTransactionGUI(SaleTransaction obj) {
+        return transactions.add(obj);
+    }
+
+    public int basicSearch(String search) {
+        int x = 0;
+
+        for (Vehicle i : vehicleInventory) {
+            if (i.getVin().equalsIgnoreCase(search)) {
+                return x;
+            }
+            ++x;
+        }
+        return vehicleInventory.size();
+    }
+
+    public boolean vehicleMatch(String id) {
+        for (Vehicle i : vehicleInventory) {
+            if (i.getVin().equalsIgnoreCase(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * getVehicleAtPosition is a helper method for the GUI to return the Vehicle object at the position i
+     * @param i an int
+     * @return vehicleinventory.get(i), a Vehicle object
+     */
+    public Vehicle getVehicleAtPosition(int i) {
+        return vehicleInventory.get(i);
+    }
+
+    /**
+     * getVehicleInvSize() method returns the current size of vehicleInventory
+     * @return vehicleInventory.size(), an int
+     */
+    public int getVehicleInvSize() {
+        return vehicleInventory.size();
+    }
+
+    /**
+     * addVehicleDirectly() accepts a Vehicle object and returns whether or not the vehicleInventory.add()
+     * method was successful or not
+     * return boolean, vehicleInventory.add(obj)
+     */
+    public boolean addVehicleDirectly(Vehicle obj) {
+        return vehicleInventory.add(obj);
+    }
+
+    /**
+     * deleteVehicleByStr() removes a Vehicle object based upon the common search String passed. Only removes a Vehicle
+     * object if there is a match, returns false otherwise
+     * @param search
+     * @return true if search matched a VIN, false otherwise
+     */
+    public boolean deleteVehicleByStr(String search) {
+        for (Vehicle i : vehicleInventory) {
+            if (i.getVin().equalsIgnoreCase(search)) {
+                vehicleInventory.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * getUserDatabaseSize() is a helper function for the GUI, returns the users.size()
+     * @return an int, users.size()
+     */
+    public int getUserDatabaseSize() {
+        return users.size();
+    }
+
+    /**
+     * getUserAtPosition() returns the User object at position i. It is guaranteed that i will not be greater than, less
+     * than, or equal to size of users.
+     * @param i, the position at which is requested
+     * @return a User object, users.get(i)
+     */
+    public User getUserAtPosition(int i) {
+        return users.get(i);
+    }
+
+    /**
+     * addUserDirectly() is a helper method to the GUI and adds a User obj directly to users
+     * @param obj of User datatype
+     * @return true if users.add(obj) is successful, false otherwise
+     */
+    public boolean addUserDirectly(User obj) {
+        return users.add(obj);
+    }
+
+    /**
+     * getSaleTransactionSize returns the size of the ArrayList of SaleTransactions
+     * @return transactions.size(), an int
+     */
+    public int getSaleTransactionSize() {
+        return transactions.size();
+    }
+
+    /**
+     * getTransactionAtPosition() returns the SaleTransaction object at position i
+     * @param i, an int
+     * @return transactions.users.get(i), a SaleTransaction object
+     */
+    public SaleTransaction getTransactionAtPosition(int i) {
+        return transactions.get(i);
+    }
+
     /**
      * This method servers as the main interface between the program and the user.
      * The method interacts with the user by printing out a set of options, and
      * asking the user to select one.
      */
-    public void runSofware() {
-        int choice = 0;
+    public void runSoftware() {
+        int choice;
         boolean exitProgram = false;
         do {
             printMenu();
             try {
                 choice = sc.nextInt();
-            
+
                 switch (choice) {
                     case 1: showAllVehicles(); break;
                     case 2: addNewVehicle(); break;
@@ -102,7 +222,7 @@ public class Dealership {
                     default: System.err.println("Please select a number between 1 and 11.");
                 }
             } catch (InputMismatchException ex) {
-                System.err.println("Input missmatch. Please Try again.");
+                System.err.println("Input mismatch. Please Try again.");
                 sc.nextLine();
                 continue;
             } catch (BadInputException ex) {
@@ -152,26 +272,26 @@ public class Dealership {
         String vin = sc.nextLine();
         if (vin.length() > 10)
             throw new BadInputException("VIN should not be more that 10 characters long.");
-        
+
         System.out.print("\nEnter Make (string): ");
         String make = sc.nextLine();
-        
+
         System.out.print("\nEnter Model (string): ");
         String model = sc.nextLine();
-        
+
         System.out.print("\nEnter Year (int): ");
         int year = sc.nextInt();
-        
+
         System.out.print("\nEnter Mileage (int): ");
         int mileage = sc.nextInt();
         if (mileage < 0)
             throw new BadInputException("Mileage cannot be negative.");
-        
+
         System.out.print("\nEnter Price (float): ");
         float price = sc.nextFloat();
         if (price < 0.0f)
             throw new BadInputException("Price cannot be negative.");
-        
+
         if (vehicleType == 1) {
             sc.nextLine();
             System.out.print("\nEnter body style (string): ");
@@ -527,7 +647,7 @@ public class Dealership {
      * @return A new Dealership object.
      */
     @SuppressWarnings("unchecked") // This will prevent Java unchecked operation warning when
-    // convering from serialized Object to Arraylist<>
+    // converting from serialized Object to Arraylist<>
     public static Dealership readDatabase() {
         System.out.print("Reading database...");
         Dealership cds = null;
@@ -541,7 +661,7 @@ public class Dealership {
             buffer = new BufferedInputStream(file);
             input = new ObjectInputStream(buffer);
             
-            // Read serilized data
+            // Read serialized data
             List<Vehicle> vehicleInventory = (ArrayList<Vehicle>) input.readObject();
             List<User> users = (ArrayList<User>) input.readObject();
             List<SaleTransaction> transactions = (ArrayList<SaleTransaction>) input.readObject();
@@ -614,16 +734,15 @@ public class Dealership {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
         Dealership cds = readDatabase();
-        
+
         // If you could not read from the file, create a new database.
         if (cds == null) {
             System.out.println("Creating a new database.");
             cds = new Dealership();
         }
-        
-        cds.runSofware();
+
+        cds.runSoftware();
         cds.writeDatabase();
     }
 }
