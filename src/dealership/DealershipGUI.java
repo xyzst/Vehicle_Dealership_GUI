@@ -4,13 +4,20 @@ import layout.SpringUtilities;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.swing.JOptionPane;
+import java.util.logging.*;
+import java.io.*;
+import java.util.logging.Formatter;
 
 
 public class DealershipGUI extends JFrame {
     private static Dealership dummy = Dealership.readDatabase(),
                               db = (dummy == null) ? new Dealership() : dummy;
+    private static final Logger logger = Logger.getLogger(DealershipGUI.class.getName());
+    private static FileHandler fh;
 
     private final static String PASSENGERPANEL = "PASSENGER VEHICLE",
                                 MOTORCYCLEPANEL = "MOTORCYCLE",
@@ -27,8 +34,47 @@ public class DealershipGUI extends JFrame {
     DealershipGUI() {
     }
 
+    class CustomFormatter extends Formatter {
+        private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss.SSS");
+
+        @Override
+        public String format(LogRecord record) {
+            StringBuilder builder = new StringBuilder(1000);
+            builder.append(df.format(new Date(record.getMillis()))).append(" - ");
+            builder.append("[").append(record.getSourceClassName()).append(".");
+            builder.append(record.getSourceMethodName()).append("] :");
+            builder.append("\n");
+            builder.append("\t[").append(record.getLevel()).append("] - ");
+            builder.append(formatMessage(record));
+            builder.append("\n");
+            return builder.toString();
+        }
+
+        public String getHead (Handler h) {
+            return super.getHead(h);
+        }
+
+        public String getTail(Handler h) {
+            return super.getTail(h);
+        }
+    }
+
+    private void initLogger() {
+        logger.setUseParentHandlers(false);
+        CustomFormatter formatter = new CustomFormatter();
+        try {
+            fh = new FileHandler("log.txt");
+            fh.setFormatter(formatter);
+            logger.addHandler(fh);
+        }
+        catch (IOException e) {
+            logger.log(Level.SEVERE, "FileHandler threw IOException", e);
+        }
+    }
+
     private DealershipGUI (String title) {
         super(title);
+        initLogger();
         JPanel mainPanel = new JPanel(new BorderLayout());
         JPanel buttonPanel = new JPanel(new GridLayout(11, 0));
         JLabel intro = new JLabel("Please select an option below:");
@@ -61,6 +107,7 @@ public class DealershipGUI extends JFrame {
 
         existing.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Show all existing vehicles in database'");
                 field.setText("STATUS: in display inventory ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -73,6 +120,7 @@ public class DealershipGUI extends JFrame {
 
         addvehicle.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "Add a new vehicle to the database'");
                 field.setText("STATUS: in adding vehicle ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -85,6 +133,7 @@ public class DealershipGUI extends JFrame {
 
         vehicledel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Delete a vehicle from the database'");
                 field.setText("STATUS: in deleting vehicle ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -97,6 +146,7 @@ public class DealershipGUI extends JFrame {
 
         searchvehicle.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Search for a vehicle'");
                 field.setText("STATUS: in searching inventory ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -109,6 +159,7 @@ public class DealershipGUI extends JFrame {
 
         listvehicle.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Show a list of vehicles within a given range'");
                 field.setText("STATUS: in listing vehicle criteria search ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -121,6 +172,7 @@ public class DealershipGUI extends JFrame {
 
         showuser.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Show list of users'");
                 field.setText("STATUS: in displaying user database ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -133,6 +185,7 @@ public class DealershipGUI extends JFrame {
 
         adduser.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Add a new user to the database'");
                 field.setText("STATUS: adding user ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -145,6 +198,7 @@ public class DealershipGUI extends JFrame {
 
         updateuser.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Update user info'");
                 field.setText("STATUS: updating user ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -157,6 +211,7 @@ public class DealershipGUI extends JFrame {
 
         sellvehicle.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Sell a vehicle'");
                 field.setText("STATUS: selling vehicle ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -169,6 +224,7 @@ public class DealershipGUI extends JFrame {
 
         showtransax.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Show a list of completed sale transactions'");
                 field.setText("STATUS: showing transactions ...");
                 Thread qThread = new Thread() {
                     public void run() {
@@ -181,6 +237,7 @@ public class DealershipGUI extends JFrame {
 
         exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Exit program'");
                 Thread qThread = new Thread() {
                     public void run() {
                         terminateSession();
@@ -209,6 +266,7 @@ public class DealershipGUI extends JFrame {
 
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.pack();
+        logger.log(Level.INFO, "User has loaded main menu of GUI");
     }
 
     public void displayInventory() {
@@ -216,6 +274,7 @@ public class DealershipGUI extends JFrame {
             JOptionPane.showMessageDialog(null, "There is nothing to view as the database\n" +
                             " is currently empty! Now exiting..", "Failure!",
                     JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.WARNING, "User attempted to view an empty database");
             return;
         }
 
@@ -223,44 +282,50 @@ public class DealershipGUI extends JFrame {
                             "DISPLACEMENT (cc)", "LENGTH (ft)", "MAX LOAD WEIGHT (lb)"};
         String body_style, type, displ, load, length;
         Object[][] data = new Object[db.getVehicleInvSize()][header.length];
+        try {
+            for (int i = 0; i < db.getVehicleInvSize(); ++i) {
+                if (db.getVehicleAtPosition(i) instanceof PassengerCar) {
+                    data[i][0] = "Passenger";
+                    body_style = ((PassengerCar) db.getVehicleAtPosition(i)).getBodyStyle();
+                    data[i][7] = body_style;
+                    data[i][8] = "N/A";
+                    data[i][9] = "N/A";
+                    data[i][10] = "N/A";
+                    data[i][11] = "N/A";
+                } else if (db.getVehicleAtPosition(i) instanceof Motorcycle) {
+                    data[i][0] = "Motorcycle";
+                    type = ((Motorcycle) db.getVehicleAtPosition(i)).getType();
+                    displ = Integer.toString(((Motorcycle) db.getVehicleAtPosition(i)).getDisplacement());
+                    data[i][7] = "N/A";
+                    data[i][8] = type;
+                    data[i][9] = displ;
+                    data[i][10] = "N/A";
+                    data[i][11] = "N/A";
+                } else {
+                    data[i][0] = "Truck";
+                    load = Float.toString(((Truck) db.getVehicleAtPosition(i)).getMaxLoadWeight());
+                    length = Float.toString(((Truck) db.getVehicleAtPosition(i)).getLength());
+                    data[i][7] = "N/A";
+                    data[i][8] = "N/A";
+                    data[i][9] = "N/A";
+                    data[i][10] = length;
+                    data[i][11] = load;
+                }
 
-        for (int i = 0; i < db.getVehicleInvSize(); ++i) {
-            if(db.getVehicleAtPosition(i) instanceof PassengerCar) {
-                data[i][0] = "Passenger";
-                body_style = ((PassengerCar)db.getVehicleAtPosition(i)).getBodyStyle();
-                data[i][7] = body_style;
-                data[i][8] = "N/A";
-                data[i][9] = "N/A";
-                data[i][10] = "N/A";
-                data[i][11] = "N/A";
+                data[i][1] = db.getVehicleAtPosition(i).getVin();
+                data[i][2] = db.getVehicleAtPosition(i).getMake();
+                data[i][3] = db.getVehicleAtPosition(i).getModel();
+                data[i][4] = db.getVehicleAtPosition(i).getYear();
+                data[i][5] = db.getVehicleAtPosition(i).getMileage();
+                data[i][6] = db.getVehicleAtPosition(i).getPrice();
             }
-            else if (db.getVehicleAtPosition(i) instanceof Motorcycle) {
-                data[i][0] = "Motorcycle";
-                type = ((Motorcycle)db.getVehicleAtPosition(i)).getType();
-                displ = Integer.toString(((Motorcycle)db.getVehicleAtPosition(i)).getDisplacement());
-                data[i][7] = "N/A";
-                data[i][8] = type;
-                data[i][9] = displ;
-                data[i][10] = "N/A";
-                data[i][11] = "N/A";
-            }
-            else {
-                data[i][0] = "Truck";
-                load = Float.toString(((Truck)db.getVehicleAtPosition(i)).getMaxLoadWeight());
-                length = Float.toString(((Truck)db.getVehicleAtPosition(i)).getLength());
-                data[i][7] = "N/A";
-                data[i][8] = "N/A";
-                data[i][9] = "N/A";
-                data[i][10] = length;
-                data[i][11] = load;
-            }
-
-            data[i][1] = db.getVehicleAtPosition(i).getVin();
-            data[i][2] = db.getVehicleAtPosition(i).getMake();
-            data[i][3] = db.getVehicleAtPosition(i).getModel();
-            data[i][4] = db.getVehicleAtPosition(i).getYear();
-            data[i][5] = db.getVehicleAtPosition(i).getMileage();
-            data[i][6] = db.getVehicleAtPosition(i).getPrice();
+        }
+        catch (ClassCastException e) {
+            logger.log(Level.SEVERE, "ClassCastException thrown, possible database corruption");
+        }
+        catch (Exception e) {
+            logger.log(Level.SEVERE, "Unknown exception thrown! See stack trace..", e);
+            e.printStackTrace();
         }
 
         JFrame display = new JFrame("Inventory List");
@@ -275,6 +340,7 @@ public class DealershipGUI extends JFrame {
         display.pack();
         display.setVisible(true);
         display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        logger.log(Level.INFO, "User in 'Inventory List' window");
     }
 
     public void addVehicle() {
@@ -288,6 +354,8 @@ public class DealershipGUI extends JFrame {
         //Display the window.
         frame.pack();
         frame.setVisible(true);
+
+        logger.log(Level.INFO, "User in 'Adding Vehicle' window");
     }
 
     public void deleteVehicleGUI() {
@@ -297,6 +365,7 @@ public class DealershipGUI extends JFrame {
             JOptionPane.showMessageDialog(frame, "There is nothing to delete as the database\n" +
                             " is currently empty! Now exiting removal process..", "Failure!",
                     JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.WARNING, "User attempted to view an empty list (vehicles)");
             return;
         }
 
@@ -314,16 +383,20 @@ public class DealershipGUI extends JFrame {
 
         submit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User submitted a VIN (string)");
                 Thread qThread = new Thread() {
                     public void run() {
                         if (db.deleteVehicleByStr(VIN.getText())) {
                             JOptionPane.showMessageDialog(frame, "Removal was successful!", "Success!",
                                     JOptionPane.INFORMATION_MESSAGE);
+                            logger.log(Level.INFO, "User was able to remove a vehicle via string value");
                         }
                         else {
                             JOptionPane.showMessageDialog(frame, "Removal was unsuccessful! Please check your input" +
                                             " and try again!", "Failure!",
                                     JOptionPane.ERROR_MESSAGE);
+                            logger.log(Level.INFO, "User's search term was not found, nothing removed from vehicle" +
+                                    "database");
                         }
                     }
                 };
@@ -334,6 +407,7 @@ public class DealershipGUI extends JFrame {
         exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 frame.dispose();
+                logger.log(Level.INFO, "User presses 'Exit' button");
             }
         });
 
@@ -342,6 +416,7 @@ public class DealershipGUI extends JFrame {
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+        logger.log(Level.INFO, "User opened up GUI option to delete a vehicle");
     }
 
     public void searchVehicleGUI() {
@@ -349,6 +424,7 @@ public class DealershipGUI extends JFrame {
         if (db.getVehicleInvSize() == 0) {
             JOptionPane.showMessageDialog(frame, "The database is empty, there is nothing to search for!", "Failure!",
                     JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.WARNING, "User attempted to search an empty vehicle database");
             return;
         }
         JPanel panel = new JPanel();
@@ -366,11 +442,13 @@ public class DealershipGUI extends JFrame {
         exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 frame.dispose();
+                logger.log(Level.INFO, "User has exited from 'Vehicle Search' window");
             }
         });
 
         submit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User attempted to submit a string value to search for");
                 Thread qThread = new Thread() {
                     public void run() {
                         String[] header = {"TYPE", "VIN", "MAKE", "MODEL", "YEAR", "MILEAGE", "PRICE", "BODY STYLE", "TYPE",
@@ -379,54 +457,57 @@ public class DealershipGUI extends JFrame {
                         Object[][] data = new Object[1][header.length];
 
                         int index;
-                        if ((index = db.basicSearch(search.getText())) != db.getVehicleInvSize()) {
-                            data[0][1] = db.getVehicleAtPosition(index).getVin();
-                            data[0][2] = db.getVehicleAtPosition(index).getMake();
-                            data[0][3] = db.getVehicleAtPosition(index).getModel();
-                            data[0][4] = db.getVehicleAtPosition(index).getYear();
-                            data[0][5] = db.getVehicleAtPosition(index).getMileage();
-                            data[0][6] = db.getVehicleAtPosition(index).getPrice();
-                            if (db.getVehicleAtPosition(index) instanceof PassengerCar) {
-                                data[0][0] = "Passenger";
-                                data[0][7] = ((PassengerCar)db.getVehicleAtPosition(index)).getBodyStyle();
-                                data[0][8] = "N/A";
-                                data[0][9] = "N/A";
-                                data[0][10] = "N/A";
-                                data[0][11] = "N/A";
-                            }
-                            else if (db.getVehicleAtPosition(index) instanceof Motorcycle) {
-                                data[0][0] = "Motorcycle";
-                                data[0][7] = "N/A";
-                                data[0][8] = ((Motorcycle)db.getVehicleAtPosition(index)).getType();
-                                data[0][9] = Integer.toString(((Motorcycle)db.getVehicleAtPosition(index)).getDisplacement());
-                                data[0][10] = "N/A";
-                                data[0][11] = "N/A";
-                            }
-                            else {
-                                data[0][0] = "Truck";
-                                data[0][7] = "N/A";
-                                data[0][8] = "N/A";
-                                data[0][9] = "N/A";
-                                data[0][10] = Float.toString(((Truck)db.getVehicleAtPosition(index)).getLength());
-                                data[0][11] = Float.toString(((Truck)db.getVehicleAtPosition(index)).getMaxLoadWeight());
-                            }
+                        try {
+                            if ((index = db.basicSearch(search.getText())) != db.getVehicleInvSize()) {
+                                data[0][1] = db.getVehicleAtPosition(index).getVin();
+                                data[0][2] = db.getVehicleAtPosition(index).getMake();
+                                data[0][3] = db.getVehicleAtPosition(index).getModel();
+                                data[0][4] = db.getVehicleAtPosition(index).getYear();
+                                data[0][5] = db.getVehicleAtPosition(index).getMileage();
+                                data[0][6] = db.getVehicleAtPosition(index).getPrice();
+                                if (db.getVehicleAtPosition(index) instanceof PassengerCar) {
+                                    data[0][0] = "Passenger";
+                                    data[0][7] = ((PassengerCar) db.getVehicleAtPosition(index)).getBodyStyle();
+                                    data[0][8] = "N/A";
+                                    data[0][9] = "N/A";
+                                    data[0][10] = "N/A";
+                                    data[0][11] = "N/A";
+                                } else if (db.getVehicleAtPosition(index) instanceof Motorcycle) {
+                                    data[0][0] = "Motorcycle";
+                                    data[0][7] = "N/A";
+                                    data[0][8] = ((Motorcycle) db.getVehicleAtPosition(index)).getType();
+                                    data[0][9] = Integer.toString(((Motorcycle) db.getVehicleAtPosition(index)).getDisplacement());
+                                    data[0][10] = "N/A";
+                                    data[0][11] = "N/A";
+                                } else {
+                                    data[0][0] = "Truck";
+                                    data[0][7] = "N/A";
+                                    data[0][8] = "N/A";
+                                    data[0][9] = "N/A";
+                                    data[0][10] = Float.toString(((Truck) db.getVehicleAtPosition(index)).getLength());
+                                    data[0][11] = Float.toString(((Truck) db.getVehicleAtPosition(index)).getMaxLoadWeight());
+                                }
 
-                            JFrame display = new JFrame("Result(s)");
-                            final JTable table = new JTable(data, header);
-                            table.setPreferredScrollableViewportSize(new Dimension(800, 100));
-                            table.setFillsViewportHeight(true);
-                            table.setEnabled(false);
+                                JFrame display = new JFrame("Result(s)");
+                                final JTable table = new JTable(data, header);
+                                table.setPreferredScrollableViewportSize(new Dimension(800, 100));
+                                table.setFillsViewportHeight(true);
+                                table.setEnabled(false);
 
-                            JScrollPane scrollPane = new JScrollPane(table);
-                            display.add(scrollPane);
+                                JScrollPane scrollPane = new JScrollPane(table);
+                                display.add(scrollPane);
 
-                            display.pack();
-                            display.setVisible(true);
-                            display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                                display.pack();
+                                display.setVisible(true);
+                                display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                            } else {
+                                JOptionPane.showMessageDialog(frame, "VIN not found in the database!", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
                         }
-                        else {
-                            JOptionPane.showMessageDialog(frame, "VIN not found in the database!", "Failure!",
-                                    JOptionPane.ERROR_MESSAGE);
+                        catch (ClassCastException e) {
+                            logger.log(Level.SEVERE, "ClassCastException unexpectedly thrown. Refer to stack trace", e);
+                            e.printStackTrace();
                         }
                     }
                 };
@@ -437,6 +518,7 @@ public class DealershipGUI extends JFrame {
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
         frame.pack();
+        logger.log(Level.INFO, "User entered 'Vehicle Search' window");
     }
 
     public void vehiclePriceRange() {
@@ -444,6 +526,7 @@ public class DealershipGUI extends JFrame {
         if (db.getVehicleInvSize() == 0) {
             JOptionPane.showMessageDialog(frame, "The database is empty, there is nothing to search for!", "Failure!",
                     JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.INFO, "User attempted to search within an empty database");
             return;
         }
         JPanel panel = new JPanel(new GridLayout(3,1,2,5));
@@ -464,6 +547,7 @@ public class DealershipGUI extends JFrame {
 
         exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User has pressed 'Exit'");
                 frame.dispose();
             }
         });
@@ -472,58 +556,84 @@ public class DealershipGUI extends JFrame {
             public void actionPerformed(ActionEvent ev) {
                 Thread qThread = new Thread() {
                     public void run() {
+                        logger.log(Level.INFO, "User pressed 'Submit'");
                         String[] header = {"TYPE", "VIN", "MAKE", "MODEL", "YEAR", "MILEAGE", "PRICE", "BODY STYLE", "TYPE",
                                 "DISPLACEMENT (cc)", "LENGTH (ft)", "MAX LOAD WEIGHT (lb)"};
 
                         Object[][] data = new Object[db.getVehicleInvSize()][header.length];
+                        try {
+                            int index = 0;
+                            float low = Float.parseFloat(lowTF.getText());
+                            float high = Float.parseFloat(highTF.getText());
+                            if (low < 0) {
+                                JOptionPane.showMessageDialog(frame, "Invalid range entered!", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.WARNING, "User entered a negative value, low");
+                                return;
+                            }
 
-                        int index = 0;
-                        float low = Float.parseFloat(lowTF.getText());
-                        float high = Float.parseFloat(highTF.getText());
-                        if (high < low) {
-                            JOptionPane.showMessageDialog(frame, "Invalid range entered!", "Failure!",
-                                    JOptionPane.ERROR_MESSAGE);
-                            return;
-                        }
-                        for (int i = 0; i < db.getVehicleInvSize(); ++i) {
-                            if (db.getVehicleAtPosition(i).getPrice() >= low &&
-                                    db.getVehicleAtPosition(i).getPrice() <= high) {
-                                data[index][1] = db.getVehicleAtPosition(i).getVin();
-                                data[index][2] = db.getVehicleAtPosition(i).getMake();
-                                data[index][3] = db.getVehicleAtPosition(i).getModel();
-                                data[index][4] = db.getVehicleAtPosition(i).getYear();
-                                data[index][5] = db.getVehicleAtPosition(i).getMileage();
-                                data[index][6] = db.getVehicleAtPosition(i).getPrice();
-                                if (db.getVehicleAtPosition(i) instanceof PassengerCar) {
-                                    data[index][0] = "Passenger";
-                                    data[index][7] = ((PassengerCar) db.getVehicleAtPosition(i)).getBodyStyle();
-                                    data[index][8] = "N/A";
-                                    data[index][9] = "N/A";
-                                    data[index][10] = "N/A";
-                                    data[index][11] = "N/A";
-                                } else if (db.getVehicleAtPosition(i) instanceof Motorcycle) {
-                                    data[index][0] = "Motorcycle";
-                                    data[index][7] = "N/A";
-                                    data[index][8] = ((Motorcycle) db.getVehicleAtPosition(i)).getType();
-                                    data[index][9] = Integer.toString(((Motorcycle) db.getVehicleAtPosition(i)).getDisplacement());
-                                    data[index][10] = "N/A";
-                                    data[index][11] = "N/A";
-                                } else {
-                                    data[index][0] = "Truck";
-                                    data[index][7] = "N/A";
-                                    data[index][8] = "N/A";
-                                    data[index][9] = "N/A";
-                                    data[index][10] = Float.toString(((Truck) db.getVehicleAtPosition(i)).getLength());
-                                    data[index][11] = Float.toString(((Truck) db.getVehicleAtPosition(i)).getMaxLoadWeight());
+                            if (high < 0) {
+                                JOptionPane.showMessageDialog(frame, "Invalid range entered!", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.WARNING, "User entered a negativ value, high");
+                            }
+
+                            if (high < low) {
+                                JOptionPane.showMessageDialog(frame, "Invalid range entered!", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.WARNING, "User entered an invalid range");
+                                return;
+                            }
+                            for (int i = 0; i < db.getVehicleInvSize(); ++i) {
+                                if (db.getVehicleAtPosition(i).getPrice() >= low &&
+                                        db.getVehicleAtPosition(i).getPrice() <= high) {
+                                    data[index][1] = db.getVehicleAtPosition(i).getVin();
+                                    data[index][2] = db.getVehicleAtPosition(i).getMake();
+                                    data[index][3] = db.getVehicleAtPosition(i).getModel();
+                                    data[index][4] = db.getVehicleAtPosition(i).getYear();
+                                    data[index][5] = db.getVehicleAtPosition(i).getMileage();
+                                    data[index][6] = db.getVehicleAtPosition(i).getPrice();
+                                    if (db.getVehicleAtPosition(i) instanceof PassengerCar) {
+                                        data[index][0] = "Passenger";
+                                        data[index][7] = ((PassengerCar) db.getVehicleAtPosition(i)).getBodyStyle();
+                                        data[index][8] = "N/A";
+                                        data[index][9] = "N/A";
+                                        data[index][10] = "N/A";
+                                        data[index][11] = "N/A";
+                                    } else if (db.getVehicleAtPosition(i) instanceof Motorcycle) {
+                                        data[index][0] = "Motorcycle";
+                                        data[index][7] = "N/A";
+                                        data[index][8] = ((Motorcycle) db.getVehicleAtPosition(i)).getType();
+                                        data[index][9] = Integer.toString(((Motorcycle) db.getVehicleAtPosition(i)).getDisplacement());
+                                        data[index][10] = "N/A";
+                                        data[index][11] = "N/A";
+                                    } else {
+                                        data[index][0] = "Truck";
+                                        data[index][7] = "N/A";
+                                        data[index][8] = "N/A";
+                                        data[index][9] = "N/A";
+                                        data[index][10] = Float.toString(((Truck) db.getVehicleAtPosition(i)).getLength());
+                                        data[index][11] = Float.toString(((Truck) db.getVehicleAtPosition(i)).getMaxLoadWeight());
+                                    }
+                                    index++;
                                 }
-                                index++;
+                            }
+                            if (index == 0) {
+                                JOptionPane.showMessageDialog(frame, "There are no vehicles that match your criteria", "Failure!",
+                                        JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.WARNING, "User did not find their specified vehicle");
+                                return;
                             }
                         }
-                        if (index == 0) {
-                            JOptionPane.showMessageDialog(frame, "There are no vehicles that match your criteria", "Failure!",
-                                    JOptionPane.ERROR_MESSAGE);
-                            return;
+                        catch (NumberFormatException e) {
+                            logger.log(Level.WARNING, "User caused a NumberFormatException");
+                            e.printStackTrace();
                         }
+                        catch (Exception e) {
+                            logger.log(Level.SEVERE, "Unknown exception has occurred, refer to stack trace", e);
+                            e.printStackTrace();
+                        }
+
                         JFrame display = new JFrame("Result(s)");
                         final JTable table = new JTable(data, header);
                         table.setPreferredScrollableViewportSize(new Dimension(800, 100));
@@ -552,32 +662,40 @@ public class DealershipGUI extends JFrame {
             JOptionPane.showMessageDialog(null, "There is nothing to view as the database\n" +
                             " is currently empty! Now exiting..", "Failure!",
                     JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.WARNING, "User attempted to view an empty user database");
             return;
         }
 
         String[] header = {"TYPE", "ID#", "FIRST NAME", "LAST NAME", "PHONE NUMBER", "DL#", "MONTHLY SALARY",
                             "BANK ACCT#"};
         Object[][] data = new Object[db.getUserDatabaseSize()][header.length];
+        try {
+            for (int i = 0; i < db.getUserDatabaseSize(); ++i) {
+                if (db.getUserAtPosition(i) instanceof Customer) {
+                    data[i][0] = "Customer";
+                    data[i][4] = ((Customer) db.getUserAtPosition(i)).getPhoneNumber();
+                    data[i][5] = ((Customer) db.getUserAtPosition(i)).getDriverLicenceNumber();
+                    data[i][6] = "N/A";
+                    data[i][7] = "N/A";
+                } else if (db.getUserAtPosition(i) instanceof Employee) {
+                    data[i][0] = "Employee";
+                    data[i][4] = "N/A";
+                    data[i][5] = "N/A";
+                    data[i][6] = ((Employee) db.getUserAtPosition(i)).getMonthlySalary();
+                    data[i][7] = ((Employee) db.getUserAtPosition(i)).getBankAccountNumber();
+                }
 
-        for (int i = 0; i < db.getUserDatabaseSize(); ++i) {
-            if(db.getUserAtPosition(i) instanceof Customer) {
-                data[i][0] = "Customer";
-                data[i][4] = ((Customer)db.getUserAtPosition(i)).getPhoneNumber();
-                data[i][5] = ((Customer)db.getUserAtPosition(i)).getDriverLicenceNumber();
-                data[i][6] = "N/A";
-                data[i][7] = "N/A";
+                data[i][1] = db.getUserAtPosition(i).getId();
+                data[i][2] = db.getUserAtPosition(i).getFirstName();
+                data[i][3] = db.getUserAtPosition(i).getLastName();
             }
-            else if (db.getUserAtPosition(i) instanceof Employee) {
-                data[i][0] = "Employee";
-                data[i][4] = "N/A";
-                data[i][5] = "N/A";
-                data[i][6] = ((Employee)db.getUserAtPosition(i)).getMonthlySalary();
-                data[i][7] = ((Employee)db.getUserAtPosition(i)).getBankAccountNumber();
-            }
-
-            data[i][1] = db.getUserAtPosition(i).getId();
-            data[i][2] = db.getUserAtPosition(i).getFirstName();
-            data[i][3] = db.getUserAtPosition(i).getLastName();
+        }
+        catch (ClassCastException e) {
+            logger.log(Level.SEVERE, "ClassCastException thrown unexpectedly, refer to stack trace", e);
+            e.printStackTrace();
+        }
+        catch (Exception e) {
+            logger.log(Level.SEVERE, "Unknown exception thrown, refer to stack trace", e);
         }
 
         JFrame display = new JFrame("User List");
@@ -592,6 +710,7 @@ public class DealershipGUI extends JFrame {
         display.pack();
         display.setVisible(true);
         display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        logger.log(Level.INFO, "User has entered 'User List'");
     }
 
     public void addUserGUI() {
@@ -605,6 +724,7 @@ public class DealershipGUI extends JFrame {
         //Display the window.
         frame.pack();
         frame.setVisible(true);
+        logger.log(Level.INFO, "User has entered 'Adding new user'");
     }
 
     public void updateUserGUI() {
@@ -620,16 +740,26 @@ public class DealershipGUI extends JFrame {
 
         submit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
+                logger.log(Level.INFO, "User pressed 'Submit'");
                 int q = 0;
                 for (int i = 0; i < db.getUserDatabaseSize(); ++i, q++) {
-                    if (db.getUserAtPosition(i).getId() == Integer.parseInt(entry.getText())) {
-                        break;
+                    try {
+                        if (db.getUserAtPosition(i).getId() == Integer.parseInt(entry.getText())) {
+                            break;
+                        }
+                    }
+                    catch (NumberFormatException e) {
+                        logger.log(Level.SEVERE, "User submitted non-integer values", e);
+                    }
+                    catch (Exception ex) {
+                        logger.log(Level.SEVERE, "Unknown exception occurred", ex);
                     }
                 }
                 final User temp = db.getUserAtPosition(q);
                 if (temp == null) {
                     JOptionPane.showMessageDialog(frame, "User ID not found!", "Failure!",
                             JOptionPane.ERROR_MESSAGE);
+                    logger.log(Level.INFO, "User did not enter a valid ID#");
                     return;
                 }
                 else {
@@ -697,6 +827,7 @@ public class DealershipGUI extends JFrame {
                             }
                             JOptionPane.showMessageDialog(frame, "User has been successfully updated!", "Success!",
                                     JOptionPane.INFORMATION_MESSAGE);
+                            logger.log(Level.INFO, "User able to update a user");
                             frame.dispose();
                         }
                     });
@@ -708,6 +839,7 @@ public class DealershipGUI extends JFrame {
         frame.pack();
         frame.setVisible(true);
         frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        logger.log(Level.INFO, "User entered 'Update User' operation");
     }
 
     public void sellVehicleGUI(){
@@ -727,6 +859,7 @@ public class DealershipGUI extends JFrame {
                 if ((Integer.parseInt(eCustID.getText()) < 0)) {
                     JOptionPane.showMessageDialog(frame, "INVALID INPUT: ID cannot be a negative value", "Failure!",
                             JOptionPane.ERROR_MESSAGE);
+                    logger.log(Level.WARNING, "User entered bad input, a negative value");
                 }
                 else if (db.userExists(Integer.parseInt(eCustID.getText())) &&
                         db.getUserAtPosition(Integer.parseInt(eCustID.getText()) - 1) instanceof Customer) {
@@ -746,6 +879,7 @@ public class DealershipGUI extends JFrame {
                             if ((Integer.parseInt(eEmpID.getText()) < 0)) {
                                 JOptionPane.showMessageDialog(frame, "INVALID INPUT: ID cannot be a negative value", "Failure!",
                                         JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.WARNING, "User entered bad input, a negative value");
                             }
                             else if (db.userExists(Integer.parseInt(eEmpID.getText())) &&
                                     db.getUserAtPosition(Integer.parseInt(eEmpID.getText()) - 1) instanceof Employee) {
@@ -783,6 +917,7 @@ public class DealershipGUI extends JFrame {
                                                        JOptionPane.showMessageDialog(frame, "Price cannot be negative! " +
                                                                        "Please check your input and try again; or exit window\n", "Failure!",
                                                                JOptionPane.ERROR_MESSAGE);
+                                                       logger.log(Level.WARNING, "User entered a negative value for 'price'");
                                                    }
                                                    else {
                                                        SaleTransaction trans = new SaleTransaction(custID, employeeID,
@@ -792,6 +927,7 @@ public class DealershipGUI extends JFrame {
                                                            JOptionPane.showMessageDialog(frame, "addTransactionGUI() failed!\n" +
                                                                            "Aborting transaction...", "Failure!",
                                                                    JOptionPane.ERROR_MESSAGE);
+                                                           logger.log(Level.SEVERE,"addTransactionGUI() failed, transaction not added to db");
                                                            frame.dispose();
                                                        }
 
@@ -799,12 +935,14 @@ public class DealershipGUI extends JFrame {
                                                            JOptionPane.showMessageDialog(frame, "deleteVehicleByStr failed!\n" +
                                                                            "Aborting transaction...", "Failure!",
                                                                    JOptionPane.ERROR_MESSAGE);
+                                                           logger.log(Level.SEVERE, "deleteVehicleByStr failed");
                                                            frame.dispose();
                                                        }
 
                                                        JOptionPane.showMessageDialog(frame, "Transaction complete!\n " +
                                                                        "The window will close after pressing \"OK\"", "Success!",
                                                                JOptionPane.INFORMATION_MESSAGE);
+                                                       logger.log(Level.INFO, "User successful with adding transaction");
                                                        frame.dispose();
                                                    }
                                                }
@@ -821,6 +959,7 @@ public class DealershipGUI extends JFrame {
                                            JOptionPane.showMessageDialog(frame, "VIN does not exist! " +
                                                            "Please check your input and try again; or exit window\n", "Failure!",
                                                    JOptionPane.ERROR_MESSAGE);
+                                           logger.log(Level.WARNING, "User entered an invalid VIN or it does not exist");
                                        }
 
                                        frame.getContentPane().removeAll();
@@ -838,6 +977,7 @@ public class DealershipGUI extends JFrame {
                                 JOptionPane.showMessageDialog(frame, "Employee does not exist! Please check your input and try again.\n" +
                                                 "Need a valid employee ID to continue with transaction.", "Failure!",
                                         JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.WARNING, "User entered an ID that does not exist");
                             }
                         }
                     });
@@ -851,6 +991,7 @@ public class DealershipGUI extends JFrame {
                     JOptionPane.showMessageDialog(frame, "User does not exist! Please check your input and try again.\n" +
                                     "You may need to add the customer to the database before proceeding with a sale.", "Failure!",
                             JOptionPane.ERROR_MESSAGE);
+                    logger.log(Level.WARNING, "User entered a User ID that does not exist");
                 }
             }
         });
@@ -859,6 +1000,7 @@ public class DealershipGUI extends JFrame {
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
         frame.pack();
+        logger.log(Level.INFO, "User entered 'sell a vehicle' operation");
     }
 
     public void listTransactionsGUI() {
@@ -866,6 +1008,7 @@ public class DealershipGUI extends JFrame {
             JOptionPane.showMessageDialog(null, "There is nothing to view as the database\n" +
                             " is currently empty! Now exiting..", "Failure!",
                     JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.WARNING, "User attempted to view an empty transaction database");
             return;
         }
 
@@ -893,10 +1036,12 @@ public class DealershipGUI extends JFrame {
         display.pack();
         display.setVisible(true);
         display.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        logger.log(Level.INFO, "User is in list transactions operation");
     }
 
     public void terminateSession() {
         db.writeDatabase();
+        logger.log(Level.INFO, "User has closed the program via 'Exit' in main menu, exit successful!");
         System.exit(0);
     }
 
@@ -955,6 +1100,7 @@ public class DealershipGUI extends JFrame {
 
                         if (cFName.getText().length() == 0) {
                             err.add("Field 'First Name' is empty");
+                            logger.log(Level.WARNING, "User submitted an empty field text (First Name)");
                         }
 
                         first = cFNameTF.getText();
@@ -962,54 +1108,68 @@ public class DealershipGUI extends JFrame {
 
                         if (cLNameTF.getText().length() == 0) {
                             err.add("Field 'Last Name' is empty");
+                            logger.log(Level.WARNING, "User submitted an empty field (Last Name)");
+
                         }
 
                         last = cLNameTF.getText();
 
                         if (cPhoneTF.getText().length() == 0) {
                             err.add("Field 'Phone Number' is empty");
+                            logger.log(Level.WARNING, "User submitted an empty field (Phone Number)");
                         }
 
                         phone = cPhoneTF.getText();
 
                         if (cDLNTF.getText().length() == 0) {
                             err.add("'Year' value is invalid");
+                            logger.log(Level.WARNING, "User submitted empty field (Year)");
                         }
 
-                        dl = Integer.parseInt(cDLNTF.getText());
+                        try {
+                            dl = Integer.parseInt(cDLNTF.getText());
 
 
-                        if (err.isEmpty()) {
-                            Customer newObj = new Customer(db.userIdCounter++, first, last, phone, dl);
-                            if (db.addUserDirectly(newObj)) {
+                            if (err.isEmpty()) {
+                                Customer newObj = new Customer(db.userIdCounter++, first, last, phone, dl);
+                                if (db.addUserDirectly(newObj)) {
+                                    Container frame = card1.getParent();
+                                    do {
+                                        frame = frame.getParent();
+                                    } while (!(frame instanceof JFrame));
+                                    JOptionPane.showMessageDialog(frame, "User has been successfully added!\n" +
+                                                    "You may continue to add users by pressing \"Ok\" \n" +
+                                                    "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
+                                                    "then \"Exit\" (in the 'Adding new user' window)",
+                                            "Success!", JOptionPane.INFORMATION_MESSAGE);
+                                    logger.log(Level.INFO, "New user added successfully");
+                                } else {
+                                    Container frame = card1.getParent();
+                                    do {
+                                        frame = frame.getParent();
+                                    } while (!(frame instanceof JFrame));
+                                    JOptionPane.showMessageDialog(frame, "addUserDirectly(User) method failed, " +
+                                                    "despite criteria being met. An unknown error has occurred!", "Failure!",
+                                            JOptionPane.ERROR_MESSAGE);
+                                    logger.log(Level.SEVERE, "addUserDirectly(User) failed");
+                                }
+                            } else {
                                 Container frame = card1.getParent();
                                 do {
                                     frame = frame.getParent();
                                 } while (!(frame instanceof JFrame));
-                                JOptionPane.showMessageDialog(frame, "User has been successfully added!\n" +
-                                                "You may continue to add users by pressing \"Ok\" \n" +
-                                                "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
-                                                "then \"Exit\" (in the 'Adding new user' window)",
-                                        "Success!", JOptionPane.INFORMATION_MESSAGE);
-                            }
-                            else {
-                                Container frame = card1.getParent();
-                                do {
-                                    frame = frame.getParent();
-                                } while (!(frame instanceof JFrame));
-                                JOptionPane.showMessageDialog(frame, "addUserDirectly(User) method failed, " +
-                                                "despite criteria being met. An unknown error has occurred!", "Failure!",
-                                        JOptionPane.ERROR_MESSAGE);
+                                for (String i : err) {
+                                    JOptionPane.showMessageDialog(frame, i, "Failure!", JOptionPane.ERROR_MESSAGE);
+                                }
                             }
                         }
-                        else {
-                            Container frame = card1.getParent();
-                            do {
-                                frame = frame.getParent();
-                            } while (!(frame instanceof JFrame));
-                            for (String i : err) {
-                                JOptionPane.showMessageDialog(frame, i, "Failure!", JOptionPane.ERROR_MESSAGE);
-                            }
+                        catch (NumberFormatException e) {
+                            logger.log(Level.SEVERE, "User submitted non-integer values", e);
+                            e.printStackTrace();
+                        }
+                        catch (Exception e) {
+                            logger.log(Level.SEVERE, "Unknown exception thrown, refer to stack trace");
+                            e.printStackTrace();
                         }
                     }
                 };
@@ -1019,6 +1179,7 @@ public class DealershipGUI extends JFrame {
 
         cCLEAR.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                logger.log(Level.INFO, "User cleared the form");
                 cFNameTF.setText("");
                 cLNameTF.setText("");
                 cPhoneTF.setText("");
@@ -1059,6 +1220,7 @@ public class DealershipGUI extends JFrame {
 
         exitFromMotor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                logger.log(Level.INFO, "User is exiting the add vehicle window");
                 Container frame = exitFrom.getParent();
                 do {
                     frame = frame.getParent();
@@ -1119,6 +1281,7 @@ public class DealershipGUI extends JFrame {
                                                 "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
                                                 "then \"Exit\" (in the 'Adding new user' window)",
                                         "Success!", JOptionPane.INFORMATION_MESSAGE);
+                                logger.log(Level.INFO, "User successfully adds a new Employee");
                             }
                             else {
                                 Container frame = card2.getParent();
@@ -1128,6 +1291,7 @@ public class DealershipGUI extends JFrame {
                                 JOptionPane.showMessageDialog(frame, "addUserDirectly(User) method failed, " +
                                                 "despite criteria being met. An unknown error has occurred!", "Failure!",
                                         JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.SEVERE, "Unable to add a new user despite criteria being met in addUserDirectly()");
                             }
                         }
                         else {
@@ -1137,6 +1301,7 @@ public class DealershipGUI extends JFrame {
                             } while (!(frame instanceof JFrame));
                             for (String i : err) {
                                 JOptionPane.showMessageDialog(frame, i, "Failure!", JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.WARNING, "Program displaying error message logs to user");
                             }
                         }
                     }
@@ -1147,6 +1312,7 @@ public class DealershipGUI extends JFrame {
 
         eCLEAR.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                logger.log(Level.INFO, "User has cleared the form");
                 eFNameTF.setText("");
                 eLNameTF.setText("");
                 eBANTF.setText("");
@@ -1208,6 +1374,7 @@ public class DealershipGUI extends JFrame {
 
         exitFrom.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                logger.log(Level.INFO, "User exited from adding vehicle window gracefully");
                 Container frame = exitFrom.getParent();
                 do {
                     frame = frame.getParent();
@@ -1227,12 +1394,15 @@ public class DealershipGUI extends JFrame {
 
                         if (pcVINTF.getText().length() == 0) {
                             err.add("Field 'VIN' is empty");
+                            logger.log(Level.WARNING, "User submitted empty field, VIN");
                         }
                         else if (pcVINTF.getText().length() > 10) {
                             err.add("'VIN' length is too long!");
+                            logger.log(Level.WARNING, "User submitted String that is too long");
                         }
                         else if (db.vehicleMatch(pcVINTF.getText())) {
                             err.add("'VIN' already exists in the database!");
+                            logger.log(Level.WARNING, "User submitted VIN that already exists");
                         }
 
                         VIN = pcVINTF.getText();
@@ -1240,49 +1410,59 @@ public class DealershipGUI extends JFrame {
 
                         if (pcMAKETF.getText().length() == 0) {
                             err.add("Field 'Make' is empty");
+                            logger.log(Level.WARNING, "User submitted an empty field, Make");
                         }
 
                         make = pcMAKETF.getText();
 
                         if (pcMODELTF.getText().length() == 0) {
                             err.add("Field 'Model' is empty");
+                            logger.log(Level.WARNING, "User submitted an empty field, Model");
                         }
 
                         model = pcMODELTF.getText();
 
                         if (pcYEARTF.getText().length() != 4) {
                             err.add("'Year' value is invalid");
+                            logger.log(Level.WARNING, "User submitted an empty field, Year");
                         }
                         else if (Integer.parseInt(pcYEARTF.getText()) < 0) {
                             err.add("'Year' cannot be a negative value");
+                            logger.log(Level.WARNING, "User submitted a negative value for Year");
                         }
                         else if (Integer.parseInt(pcYEARTF.getText()) < 1886 ||
                                 Integer.parseInt(pcYEARTF.getText()) > 2020) {
                             err.add("'Year' is not within the acceptable range");
+                            logger.log(Level.WARNING, "User submitted a value out of range for Year");
                         }
 
                         year = Integer.parseInt(pcYEARTF.getText());
 
                         if (pcMILEAGETF.getText().length() == 0) {
                             err.add("Field 'Mileage' is empty");
+                            logger.log(Level.WARNING, "User submitted empty field, Mileage");
                         }
                         else if (Integer.parseInt(pcMILEAGETF.getText()) < 0) {
                             err.add("'Mileage' cannot be a negative value");
+                            logger.log(Level.WARNING, "User submitted negative value, Mileage");
                         }
 
                         mileage = Integer.parseInt(pcMILEAGETF.getText());
 
                         if (pcPRICETF.getText().length() == 0) {
                             err.add("Field 'Price' is empty");
+                            logger.log(Level.WARNING, "User submitted empty field, Price");
                         }
                         else if (Float.parseFloat(pcPRICETF.getText()) < 0) {
                             err.add("'Price' cannot be a negative value");
+                            logger.log(Level.WARNING, "User submitted negative value for 'Price'");
                         }
 
                         price = Float.parseFloat(pcPRICETF.getText());
 
                         if (pcBODYTF.getText().length() == 0) {
                             err.add("Field 'Body Style' is empty");
+                            logger.log(Level.WARNING, "User submitted negative value for 'Body Style'");
                         }
 
                         body = pcBODYTF.getText();
@@ -1299,6 +1479,7 @@ public class DealershipGUI extends JFrame {
                                         "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
                                         "then \"Exit\" (in the 'Adding vehicle' window)",
                                         "Success!", JOptionPane.INFORMATION_MESSAGE);
+                                logger.log(Level.INFO, "User able to succesfully add a PassengerCar object");
                             }
                             else {
                                 Container frame = card1.getParent();
@@ -1308,6 +1489,7 @@ public class DealershipGUI extends JFrame {
                                 JOptionPane.showMessageDialog(frame, "addVehicleDirectly(Vehicle) method failed, " +
                                         "despite criteria being met. An unknown error has occurred!", "Failure!",
                                         JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.SEVERE, "addVehicleDirectly() failed unexpectedly");
                             }
                         }
                         else {
@@ -1317,6 +1499,7 @@ public class DealershipGUI extends JFrame {
                             } while (!(frame instanceof JFrame));
                             for (String i : err) {
                                 JOptionPane.showMessageDialog(frame, i, "Failure!", JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.INFO, "Message dialog shown to user indicating bad input");
                             }
                         }
                     }
@@ -1327,6 +1510,7 @@ public class DealershipGUI extends JFrame {
 
         pcCLEAR.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                logger.log(Level.INFO, "User interacted with clear form button");
                 pcVINTF.setText("");
                 pcMAKETF.setText("");
                 pcMODELTF.setText("");
@@ -1386,6 +1570,7 @@ public class DealershipGUI extends JFrame {
 
         exitFromMotor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                logger.log(Level.INFO, "User exited from Add Vehicle gracefully via exit JButton");
                 Container frame = exitFrom.getParent();
                 do {
                     frame = frame.getParent();
@@ -1405,12 +1590,15 @@ public class DealershipGUI extends JFrame {
 
                         if (mVINTF.getText().length() == 0) {
                             err.add("Field 'VIN' is empty");
+                            logger.log(Level.WARNING, "User submitted empty field, VIN");
                         }
                         else if (mVINTF.getText().length() > 10) {
                             err.add("'VIN' length is too long!");
+                            logger.log(Level.WARNING, "User submitted VIN that is too long in length");
                         }
                         else if (db.vehicleMatch(mVINTF.getText())) {
                             err.add("'VIN' already exists in the database!");
+                            logger.log(Level.WARNING, "Vehicle already exists, invalid VIN to add");
                         }
 
                         VIN = mVINTF.getText();
@@ -1418,61 +1606,73 @@ public class DealershipGUI extends JFrame {
 
                         if (mMAKETF.getText().length() == 0) {
                             err.add("Field 'Make' is empty");
+                            logger.log(Level.WARNING, "User submitted field that is empty, Make");
                         }
 
                         make = mMAKETF.getText();
 
                         if (mMODELTF.getText().length() == 0) {
                             err.add("Field 'Model' is empty");
+                            logger.log(Level.WARNING, "JTextField is empty, Model");
                         }
 
                         model = mMODELTF.getText();
 
                         if (mYEARTF.getText().length() != 4) {
                             err.add("'Year' value is invalid");
+                            logger.log(Level.WARNING, "Year TextField is empty");
                         }
                         else if (Integer.parseInt(mYEARTF.getText()) < 0) {
                             err.add("'Year' cannot be a negative value");
+                            logger.log(Level.WARNING, "User submitted negative value");
                         }
                         else if (Integer.parseInt(mYEARTF.getText()) < 1886 ||
                                 Integer.parseInt(mYEARTF.getText()) > 2020) {
                             err.add("'Year' is not within the acceptable range");
+                            logger.log(Level.WARNING, "User submitted unacceptable range for Year");
                         }
 
                         year = Integer.parseInt(mYEARTF.getText());
 
                         if (mMILEAGETF.getText().length() == 0) {
                             err.add("Field 'Mileage' is empty");
+                            logger.log(Level.WARNING, "User submitted field that is empty, mileage");
                         }
                         else if (Integer.parseInt(mMILEAGETF.getText()) < 0) {
                             err.add("'Mileage' cannot be a negative value");
+                            logger.log(Level.WARNING, "User submitted a negative value for mileage");
                         }
 
                         mileage = Integer.parseInt(mMILEAGETF.getText());
 
                         if (mPRICETF.getText().length() == 0) {
                             err.add("Field 'Price' is empty");
+                            logger.log(Level.WARNING, "User submitted empty field");
                         }
                         else if (Float.parseFloat(mPRICETF.getText()) < 0) {
                             err.add("'Price' cannot be a negative value");
+                            logger.log(Level.WARNING, "User submitted negative value, price");
                         }
 
                         price = Float.parseFloat(mPRICETF.getText());
 
                         if (mTYPETF.getText().length() == 0) {
                             err.add("Field 'Type' is empty");
+                            logger.log(Level.WARNING, "User submitted empty field, Type");
                         }
 
                         type = mTYPETF.getText();
 
                         if (mDISPLTF.getText().length() == 0) {
                             err.add("Field 'Displacement' is empty");
+                            logger.log(Level.WARNING, "User submitted empty field");
                         }
                         else if (Integer.parseInt(mDISPLTF.getText()) < 0) {
                             err.add("Displacement cannot be a negative value");
+                            logger.log(Level.WARNING, "User submitted negative value for displacement");
                         }
 
-                        displ = Integer.parseInt(mTYPETF.getText());
+                        displ = Integer.parseInt(mDISPLTF.getText());
 
                         if (err.isEmpty()) {
                             Motorcycle newObj = new Motorcycle(VIN, make, model, year, mileage, price, type, displ);
@@ -1486,6 +1686,7 @@ public class DealershipGUI extends JFrame {
                                                 "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
                                                 "then \"Exit\" (in the 'Adding vehicle' window)",
                                                 "Success!", JOptionPane.INFORMATION_MESSAGE);
+                                logger.log(Level.INFO, "Motorcycle object added successfully!");
                             }
                             else {
                                 Container frame = card2.getParent();
@@ -1495,6 +1696,7 @@ public class DealershipGUI extends JFrame {
                                 JOptionPane.showMessageDialog(frame, "addVehicleDirectly(Vehicle) method failed, " +
                                                 "despite criteria being met. An unknown error has occurred!", "Failure!",
                                         JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.INFO, "addVehicleDirectly failed unexpectedly");
                             }
                         }
                         else {
@@ -1514,13 +1716,14 @@ public class DealershipGUI extends JFrame {
 
         mCLEAR.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                logger.log(Level.INFO, "User cleared the form for adding a motorcycle");
                 mVINTF.setText("");
                 mMAKETF.setText("");
                 mMODELTF.setText("");
                 mYEARTF.setText("");
                 mMILEAGETF.setText("");
                 mPRICETF.setText("");
-                mTYPE.setText("");
+                mTYPETF.setText("");
                 mDISPLTF.setText("");
             }
         });
@@ -1593,12 +1796,15 @@ public class DealershipGUI extends JFrame {
 
                         if (tVINTF.getText().length() == 0) {
                             err.add("Field 'VIN' is empty");
+                            logger.log(Level.WARNING, "Submission of empty field attempted");
                         }
                         else if (tVINTF.getText().length() > 10) {
                             err.add("'VIN' length is too long!");
+                            logger.log(Level.WARNING, "Submission of field > 10 == bad");
                         }
                         else if (db.vehicleMatch(tVINTF.getText())) {
                             err.add("'VIN' already exists in the database!");
+                            logger.log(Level.WARNING, "VIN already exists");
                         }
 
                         VIN = tVINTF.getText();
@@ -1606,61 +1812,74 @@ public class DealershipGUI extends JFrame {
 
                         if (tMAKETF.getText().length() == 0) {
                             err.add("Field 'Make' is empty");
+                            logger.log(Level.WARNING, "Submission of empty field attempted");
                         }
 
                         make = tMAKETF.getText();
 
                         if (tMODELTF.getText().length() == 0) {
                             err.add("Field 'Model' is empty");
+                            logger.log(Level.WARNING, "Submission of empty field attempted");
                         }
 
                         model = tMODELTF.getText();
 
                         if (tYEARTF.getText().length() != 4) {
                             err.add("'Year' value is invalid");
+                            logger.log(Level.WARNING, "Invalid year value submitted");
                         }
                         else if (Integer.parseInt(tYEARTF.getText()) < 0) {
                             err.add("'Year' cannot be a negative value");
+                            logger.log(Level.WARNING, "Year cannot be negative");
                         }
                         else if (Integer.parseInt(tYEARTF.getText()) < 1886 ||
                                 Integer.parseInt(tYEARTF.getText()) > 2020) {
                             err.add("'Year' is not within the acceptable range");
+                            logger.log(Level.WARNING, "Not within acceptable range for Year");
                         }
 
                         year = Integer.parseInt(tYEARTF.getText());
 
                         if (tMILEAGETF.getText().length() == 0) {
                             err.add("Field 'Mileage' is empty");
+                            logger.log(Level.WARNING, "Submission of empty field attempted");
                         }
                         else if (Integer.parseInt(tMILEAGETF.getText()) < 0) {
                             err.add("'Mileage' cannot be a negative value");
+                            logger.log(Level.WARNING, "Submission of mileage is negative");
                         }
 
                         mileage = Integer.parseInt(tMILEAGETF.getText());
 
                         if (tPRICETF.getText().length() == 0) {
                             err.add("Field 'Price' is empty");
+                            logger.log(Level.WARNING, "Submission of empty field attempted");
                         }
                         else if (Float.parseFloat(tPRICETF.getText()) < 0) {
                             err.add("'Price' cannot be a negative value");
+                            logger.log(Level.WARNING, "Submission of negative value for price attempted");
                         }
 
                         price = Float.parseFloat(tPRICETF.getText());
 
                         if (tLENGTHTF.getText().length() == 0) {
                             err.add("Field 'Length' is empty");
+                            logger.log(Level.WARNING, "Submission of empty field attempted");
                         }
                         else if (Float.parseFloat(tLENGTHTF.getText()) < 0) {
                             err.add("Length cannot be a negative value");
+                            logger.log(Level.WARNING, "Submission of negative value for length attempted");
                         }
 
                         length = Float.parseFloat(tLENGTHTF.getText());
 
                         if (tWEIGHTTF.getText().length() == 0) {
                             err.add("Field 'Weight' is empty");
+                            logger.log(Level.WARNING, "Submission of empty field attempted");
                         }
                         else if (Integer.parseInt(tWEIGHTTF.getText()) < 0) {
                             err.add("Weight cannot be a negative value");
+                            logger.log(Level.WARNING, "Submission of negative value for weight attempted");
                         }
 
                         load = Float.parseFloat(tWEIGHTTF.getText());
@@ -1677,6 +1896,7 @@ public class DealershipGUI extends JFrame {
                                                 "or you may exit from this operation by pressing \"Ok\" (in this window)\n" +
                                                 "then \"Exit\" (in the 'Adding vehicle' window)",
                                         "Success!", JOptionPane.INFORMATION_MESSAGE);
+                                logger.log(Level.INFO, "User added a truck object successfully");
                             }
                             else {
                                 Container frame = card3.getParent();
@@ -1686,6 +1906,7 @@ public class DealershipGUI extends JFrame {
                                 JOptionPane.showMessageDialog(frame, "addVehicleDirectly(Vehicle) method failed, " +
                                                 "despite criteria being met. An unknown error has occurred!", "Failure!",
                                         JOptionPane.ERROR_MESSAGE);
+                                logger.log(Level.SEVERE, "addVehicleDirectly failed");
                             }
                         }
                         else {
