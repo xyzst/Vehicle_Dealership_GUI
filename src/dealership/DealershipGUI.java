@@ -13,6 +13,14 @@ import java.io.*;
 import java.util.logging.Formatter;
 
 
+/**
+ * DealershipGUI class represents the graphical user interface of the dealership software. The class extends
+ * JFrame, henceforth will make use of Swing & AWT libraries.
+ *
+ * @author Darren Rambaud
+ * @version 1.0
+ * @version November 23, 2016 (1.0)
+ */
 public class DealershipGUI extends JFrame {
     private static Dealership dummy = Dealership.readDatabase(),
                               db = (dummy == null) ? new Dealership() : dummy;
@@ -31,12 +39,24 @@ public class DealershipGUI extends JFrame {
                     exitFromMotor,
                     exitFromTruck;
 
+    /**
+     * Constructor for class DealershipGUI
+     */
     DealershipGUI() {
     }
 
+    /**
+     * Class CustomFormatter overrides the format method of the superclass Formatter in order to format the
+     * Logger output when writing to a file to a readable format (as opposed to the default XML format)
+     */
     class CustomFormatter extends Formatter {
         private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss.SSS");
 
+        /**
+         * format() method overrides the superclass's method in order to obtain a much simpler output
+         * @param record refers to the LogRecord to change
+         * @return builder.toString(), the String which will be the new format for each log event
+         */
         @Override
         public String format(LogRecord record) {
             StringBuilder builder = new StringBuilder(1000);
@@ -59,6 +79,9 @@ public class DealershipGUI extends JFrame {
         }
     }
 
+    /**
+     * initLogger() method initializes the Logger environment for the class upon call
+     */
     private void initLogger() {
         logger.setUseParentHandlers(false);
         CustomFormatter formatter = new CustomFormatter();
@@ -72,6 +95,11 @@ public class DealershipGUI extends JFrame {
         }
     }
 
+    /**
+     * DealershipGUI represents the main menu of the GUI, allowing the user to complete various operations of a
+     * dealership
+     * @param title, sets the title of the JFrame containing the main menu
+     */
     private DealershipGUI (String title) {
         super(title);
         initLogger();
@@ -269,6 +297,10 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User has loaded main menu of GUI");
     }
 
+    /**
+     * displayInventory() method creates a new JFrame with the current inventory of the dealership. Bounds checking on
+     * the vehicleInventory size has been implemented.
+     */
     public void displayInventory() {
         if (db.getVehicleInvSize() == 0) {
             JOptionPane.showMessageDialog(null, "There is nothing to view as the database\n" +
@@ -343,6 +375,11 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User in 'Inventory List' window");
     }
 
+    /**
+     * addVehicle method creates a new JFrame to fit the various elements/process in adding a new vehicle
+     * to the database. Various checks have been implemented to avoid bad input. Allows users to try again as
+     * opposed to closing out the thread/window.
+     */
     public void addVehicle() {
         JFrame frame = new JFrame("Adding vehicle");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -358,6 +395,9 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User in 'Adding Vehicle' window");
     }
 
+    /**
+     * deleteVehicleGUI() provides a GUI to the user to guide them into deleting a vehicle from the inventory
+     */
     public void deleteVehicleGUI() {
         JFrame frame = new JFrame("Deleting vehicle");
 
@@ -419,6 +459,10 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User opened up GUI option to delete a vehicle");
     }
 
+    /**
+     * searchVehicleGUI() allows a user to search for a vehicle based upon a search query. The search may be successful
+     * or unsuccessful and displays the appropriate message dialog to the user in each event
+     */
     public void searchVehicleGUI() {
         JFrame frame = new JFrame("Vehicle search");
         if (db.getVehicleInvSize() == 0) {
@@ -521,6 +565,10 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User entered 'Vehicle Search' window");
     }
 
+    /**
+     * vehiclePriceRange() provides a GUI for the process of searching for a vehicles based on a minimum and maximum
+     * range
+     */
     public void vehiclePriceRange() {
         JFrame frame = new JFrame("Criteria search");
         if (db.getVehicleInvSize() == 0) {
@@ -657,6 +705,10 @@ public class DealershipGUI extends JFrame {
         frame.pack();
     }
 
+    /**
+     * listUsers() method displays in a new JFrame (running on a separate thread from the main GUI) the current
+     * users in the database (includes Employee and Customer objects) in a neatly formatted JTable
+     */
     public void listUsers() {
         if (db.getUserDatabaseSize() == 0) {
             JOptionPane.showMessageDialog(null, "There is nothing to view as the database\n" +
@@ -713,6 +765,12 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User has entered 'User List'");
     }
 
+    /**
+     * addUserGUI() allows the user to add either a Customer or Employee to the database via GUI. The GUI uses
+     * a CardLayout type such that it allows one JPanel to be active while keeping other JPanel contents active.
+     * A user can enter 1 tab, input some information into the text fields and enter another JPanel, key in some
+     * into the text fields and return to the other tab with the information still intact
+     */
     public void addUserGUI() {
         JFrame frame = new JFrame("Adding new user");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -727,6 +785,10 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User has entered 'Adding new user'");
     }
 
+    /**
+     * updateUserGUI() allows the user to update a specific user given their ID number. Able to update Employee &
+     * Customer objects. Appropriate message dialogs reported on failure and successs.
+     */
     public void updateUserGUI() {
         JFrame frame = new JFrame("Update a user");
         JPanel panel = new JPanel();
@@ -842,6 +904,10 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User entered 'Update User' operation");
     }
 
+    /**
+     * sellVehicleGUI() method allows the user (assuming users ID matches an Employee object) to sell a vehicle
+     * to another User (assuming the user is a Customer object)
+     */
     public void sellVehicleGUI(){
         JFrame frame = new JFrame("Selling a vehicle");
         JPanel mainpanel = new JPanel();
@@ -1003,6 +1069,9 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User entered 'sell a vehicle' operation");
     }
 
+    /**
+     * listTransactionsGUI() display the appropriate transaction data in a JTable
+     */
     public void listTransactionsGUI() {
         if (db.getSaleTransactionSize() == 0) {
             JOptionPane.showMessageDialog(null, "There is nothing to view as the database\n" +
@@ -1039,12 +1108,20 @@ public class DealershipGUI extends JFrame {
         logger.log(Level.INFO, "User is in list transactions operation");
     }
 
+    /**
+     * terminateSession() will write the database as a serialized object then exit the GUI main menu/program.
+     */
     public void terminateSession() {
         db.writeDatabase();
         logger.log(Level.INFO, "User has closed the program via 'Exit' in main menu, exit successful!");
         System.exit(0);
     }
 
+    /**
+     * newPanelComponentUser() method is a helper method for addUserGUI(), utilizes CardLayout to allow multiple
+     * JPanels within a single JFrame w/o losing entered information
+     * @param pane
+     */
     public void newPanelComponentUser(Container pane) {
         JTabbedPane tabbedPane = new JTabbedPane();
 
@@ -1326,6 +1403,10 @@ public class DealershipGUI extends JFrame {
         pane.add(tabbedPane, BorderLayout.WEST);
     }
 
+    /**
+     * newPanelComponentVehicle() is a helper method for addNewVehicle(), similar to newPanelComponentUser()
+     * @param pane
+     */
     public void newPanelComponentVehicle(Container pane) {
         JTabbedPane tabbedPane = new JTabbedPane();
 
@@ -1944,6 +2025,10 @@ public class DealershipGUI extends JFrame {
         pane.add(tabbedPane, BorderLayout.WEST);
     }
 
+    /**
+     * main() is the initializer and executes the GUI on an EDT as opposed to the main thread
+     * @param args
+     */
     public static void main (String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
