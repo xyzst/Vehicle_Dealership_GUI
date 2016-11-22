@@ -623,7 +623,87 @@ public class DealershipGUI extends JFrame {
 
         submit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
-                // FIXME stopped here
+                int q = 0;
+                for (int i = 0; i < db.getUserDatabaseSize(); ++i, q++) {
+                    if (db.getUserAtPosition(i).getId() == Integer.parseInt(entry.getText())) {
+                        break;
+                    }
+                }
+                final User temp = db.getUserAtPosition(q);
+                if (temp == null) {
+                    JOptionPane.showMessageDialog(frame, "User ID not found!", "Failure!",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                else {
+                    JPanel subpanel = new JPanel(new GridLayout(5,1,2,5));
+                    JLabel first = new JLabel("First Name: ");
+                    JTextField firstname = new JTextField(temp.getFirstName(), 12);
+                    JLabel last = new JLabel("Last Name: ");
+                    JTextField lastname = new JTextField(temp.getLastName(), 12);
+                    JButton sub_submit = new JButton("Submit Changes");
+                    JLabel phoneNum = new JLabel("Phone Number: ");
+                    JTextField phoneNumb = new JTextField(12);
+                    JLabel dlNum = new JLabel("Driver's License #: ");
+                    JTextField dlNumb = new JTextField(12);
+                    JLabel salary = new JLabel("Monthly Salary: ");
+                    JTextField salaryTF = new JTextField(12);
+                    JLabel bank = new JLabel("Bank Account #: ");
+                    JTextField bankTF = new JTextField(12);
+                    JLabel type = new JLabel();
+
+                    subpanel.add(first);
+                    subpanel.add(firstname);
+                    subpanel.add(last);
+                    subpanel.add(lastname);
+
+                    if (temp instanceof Customer) {
+                        phoneNumb.setText(((Customer) temp).getPhoneNumber());
+                        dlNumb.setText(Integer.toString(((Customer) temp).getDriverLicenceNumber()));
+                        type.setText("Type: Customer");
+
+                        subpanel.add(phoneNum);
+                        subpanel.add(phoneNumb);
+                        subpanel.add(dlNum);
+                        subpanel.add(dlNumb);
+                    }
+                    else {
+                        salaryTF.setText(Float.toString(((Employee) temp).getMonthlySalary()));
+                        bankTF.setText(Integer.toString(((Employee) temp).getBankAccountNumber()));
+                        type.setText("Type: Employee");
+
+                        subpanel.add(salary);
+                        subpanel.add(salaryTF);
+                        subpanel.add(bank);
+                        subpanel.add(bankTF);
+                    }
+
+                    subpanel.add(sub_submit);
+                    subpanel.add(type);
+
+                    frame.getContentPane().removeAll();
+                    frame.getContentPane().add(subpanel);
+                    frame.validate();
+                    frame.pack();
+
+                    sub_submit.addActionListener(new ActionListener() {
+                        public void actionPerformed (ActionEvent x) {
+                            temp.setFirstName(firstname.getText());
+                            temp.setLastName(lastname.getText());
+                            if (temp instanceof Customer) {
+                                ((Customer)temp).setPhoneNumber(phoneNumb.getText());
+                                ((Customer)temp).setDriverLicenceNumber(Integer.parseInt(dlNumb.getText()));
+                            }
+                            else {
+                                ((Employee)temp).setMonthlySalary(Float.parseFloat(salaryTF.getText()));
+                                ((Employee)temp).setBankAccountNumber(Integer.parseInt(bankTF.getText()));
+                            }
+                            JOptionPane.showMessageDialog(frame, "User has been successfully updated!", "Success!",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                            frame.dispose();
+                        }
+                    });
+                }
             }
         });
 
