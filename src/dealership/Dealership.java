@@ -74,6 +74,19 @@ public class Dealership {
         this.sc = new Scanner(System.in);
     }
 
+    public boolean userExists(int id) {
+        for (User i : users) {
+            if (i.getId() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean addTransactionGUI(SaleTransaction obj) {
+        return transactions.add(obj);
+    }
+
     public int basicSearch(String search) {
         int x = 0;
 
